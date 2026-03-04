@@ -1,11 +1,11 @@
 import logo from "../assets/images/logo.svg";
 import { Link, NavLink } from "react-router-dom";
-import navTrade from "../assets/icons/nav-trade.svg";
-import navPortfolio from "../assets/icons/nav-portfolio.svg";
-import navSignals from "../assets/icons/nav-signals.svg";
-import navCopyTrade from "../assets/icons/nav-copy-trade.svg";
-import navReferral from "../assets/icons/nav-referral.svg";
-import navApi from "../assets/home/icons/header_api_fill.svg";
+import navTrade from "../assets/icons/route-trade.svg";
+import navPortfolio from "../assets/icons/route-portfolio.svg";
+import navSignals from "../assets/icons/route-signals.svg";
+import navCopyTrade from "../assets/icons/route-copy-trade.svg";
+import navReferral from "../assets/icons/route-referral.svg";
+import navApi from "../assets/icons/route-api.svg";
 import walletIcon from "../assets/icons/wallet.svg";
 import languageIcon from "../assets/icons/language.svg";
 import settingsIcon from "../assets/icons/header-setting.svg";

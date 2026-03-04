@@ -1,0 +1,303 @@
+.ct-wizard-overlay {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.56);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  position: fixed;
+  z-index: 9999;
+}
+
+.ct-wizard-dialog {
+  background: #161d1d;
+  border-radius: 16px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 495px;
+  padding: 24px 40px;
+  width: 700px;
+}
+
+.ct-wizard-header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.ct-wizard-title {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 28px;
+  margin: 0;
+}
+
+.ct-wizard-close {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  display: inline-flex;
+  height: 24px;
+  justify-content: center;
+  padding: 0;
+  position: relative;
+  width: 24px;
+}
+
+.ct-wizard-close span {
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 1px;
+  height: 2px;
+  position: absolute;
+  width: 16px;
+}
+
+.ct-wizard-close span:first-child {
+  transform: rotate(45deg);
+}
+
+.ct-wizard-close span:last-child {
+  transform: rotate(-45deg);
+}
+
+.ct-wizard-steps {
+  align-items: flex-start;
+  display: flex;
+  height: 67px;
+}
+
+.ct-wizard-step {
+  align-items: flex-start;
+  display: inline-flex;
+  gap: 12px;
+}
+
+.ct-wizard-step-dot {
+  align-items: center;
+  border: 1px solid #07d4aa;
+  border-radius: 999px;
+  color: #07d4aa;
+  display: inline-flex;
+  flex-shrink: 0;
+  font-size: 16px;
+  font-weight: 500;
+  height: 30px;
+  justify-content: center;
+  line-height: 24px;
+  margin-top: 11px;
+  width: 30px;
+}
+
+.ct-wizard-step.is-active .ct-wizard-step-dot {
+  background: #07d4aa;
+  border-color: #07d4aa;
+  color: #000;
+}
+
+.ct-wizard-step-content {
+  margin-top: 11px;
+}
+
+.ct-wizard-step-title {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  margin: 0;
+}
+
+.ct-wizard-step-desc {
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 20px;
+  margin: 1px 0 0;
+}
+
+.ct-wizard-step.is-active .ct-wizard-step-desc {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.ct-wizard-step-line {
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  margin: 25px 20px 0;
+  width: 116px;
+}
+
+.ct-wizard-main {
+  align-items: center;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 24px;
+  padding: 11px 0;
+}
+
+.ct-wizard-section-title {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+  margin: 0;
+}
+
+.ct-wizard-account-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 304px 304px;
+}
+
+.ct-wizard-account {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 148px;
+  padding: 12px;
+}
+
+.ct-wizard-account.is-selected {
+  background: rgba(7, 212, 170, 0.1);
+  border-color: #07d4aa;
+}
+
+.ct-wizard-account-top {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.ct-wizard-account-icon {
+  display: block;
+  height: 40px;
+  width: 40px;
+}
+
+.ct-wizard-account-head {
+  flex: 1;
+  min-width: 0;
+}
+
+.ct-wizard-account-name {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 24px;
+  margin: 0;
+}
+
+.ct-wizard-account-id {
+  color: #999;
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 18px;
+  margin: 0;
+}
+
+.ct-wizard-check {
+  border: 2px solid #07d4aa;
+  border-radius: 999px;
+  display: inline-flex;
+  height: 20px;
+  position: relative;
+  width: 20px;
+}
+
+.ct-wizard-check::after {
+  border-bottom: 2px solid #07d4aa;
+  border-right: 2px solid #07d4aa;
+  content: "";
+  height: 9px;
+  left: 6px;
+  position: absolute;
+  top: 2px;
+  transform: rotate(45deg);
+  width: 4px;
+}
+
+.ct-wizard-account-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ct-wizard-account-row {
+  align-items: center;
+  display: flex;
+  height: 24px;
+  justify-content: space-between;
+}
+
+.ct-wizard-account-label {
+  color: #999;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.ct-wizard-account-value {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.ct-wizard-account-value.is-green {
+  color: #14ae5c;
+}
+
+.ct-wizard-account-value.is-blue {
+  color: #5d9dff;
+}
+
+.ct-wizard-create {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  border: 0;
+  border-radius: 8px;
+  color: #07d4aa;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 14px;
+  font-weight: 400;
+  gap: 4px;
+  height: 36px;
+  justify-content: center;
+  line-height: 24px;
+  padding: 0 16px;
+  width: 345px;
+}
+
+.ct-wizard-plus {
+  font-size: 20px;
+  line-height: 1;
+  margin-top: -2px;
+}
+
+.ct-wizard-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.ct-wizard-next {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.2);
+  border: 0;
+  border-radius: 8px;
+  color: #273035;
+  cursor: not-allowed;
+  display: inline-flex;
+  font-size: 16px;
+  font-weight: 500;
+  height: 36px;
+  justify-content: center;
+  line-height: 24px;
+  opacity: 0.55;
+  padding: 0 20px;
+}

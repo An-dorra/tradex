@@ -1,0 +1,35 @@
+.trade-route-screen {
+  background: #0b1012;
+  box-sizing: border-box;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: visible;
+}
+
+.trade-route-stage {
+  margin: 0 auto;
+  position: relative;
+}
+
+.trade-route-canvas {
+  background: linear-gradient(90deg, #273035 0%, #243038 48%, #273035 100%);
+  color: #fff;
+  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  left: 0;
+  position: absolute;
+  top: 0;
+  transform: scale(var(--trade-scale, 1));
+  transform-origin: top left;
+  width: 1920px;
+}
+
+.trade-route-canvas::before {
+  background: url("../assets/images/water.png") no-repeat center / contain;
+  content: "";
+  height: 640px;
+  pointer-events: none;
+  position: absolute;
+  right: -10px;
+  top: 80px;
+  width: 760px;
+}

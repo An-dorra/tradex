@@ -694,9 +694,11 @@
   width: 1104px;
 }
 
+.pro-chart-shell.klinecharts-pro,
 .pro-chart-shell .klinecharts-pro {
-  border-radius: 16px;
-  height: 100%;
+  --klinecharts-pro-primary-color: #07d4aa;
+  --klinecharts-pro-selected-color: rgba(7, 212, 170, 0.18);
+  --klinecharts-pro-hover-background-color: rgba(7, 212, 170, 0.12);
 }
 
 .order-book {

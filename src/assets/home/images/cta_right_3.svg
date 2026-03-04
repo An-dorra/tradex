@@ -1,0 +1,19 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 561 489.5" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Group 152">
+<path id="Vector 23" d="M13 471.5H243.19V0.5H561" stroke="var(--stroke-0, #3AE2C8)" stroke-opacity="0.2"/>
+<g id="Group 149">
+<g id="Ellipse 35" filter="url(#filter0_f_0_29)">
+<circle cx="18" cy="471.5" r="10" fill="var(--fill-0, #16866F)"/>
+</g>
+<circle id="Ellipse 37" cx="18" cy="471.5" r="10" fill="var(--fill-0, #16866F)"/>
+<circle id="Ellipse 36" cx="18" cy="471.5" r="5" fill="var(--fill-0, #C0FFF2)"/>
+</g>
+</g>
+<defs>
+<filter id="filter0_f_0_29" x="0" y="453.5" width="36" height="36" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="4" result="effect1_foregroundBlur_0_29"/>
+</filter>
+</defs>
+</svg>

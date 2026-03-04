@@ -1,0 +1,48 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 723 397" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Group 143">
+<path id="Vector 14" d="M3 330.5H723" stroke="url(#paint0_linear_0_26)"/>
+<path id="Vector 17" d="M0 396.5H522.004" stroke="url(#paint1_linear_0_26)"/>
+<path id="Vector 18" d="M0 66.5H522.004" stroke="url(#paint2_linear_0_26)"/>
+<path id="Vector 19" d="M0 132.5H522.004" stroke="url(#paint3_linear_0_26)"/>
+<path id="Vector 20" d="M0 198.5H560" stroke="url(#paint4_linear_0_26)"/>
+<path id="Vector 21" d="M0 264.5H522.004" stroke="url(#paint5_linear_0_26)"/>
+<path id="Vector 15" d="M3 0.5H673" stroke="url(#paint6_linear_0_26)"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_0_26" x1="3" y1="331" x2="723" y2="331" gradientUnits="userSpaceOnUse">
+<stop/>
+<stop offset="0.5" stop-color="#2A2A2A"/>
+<stop offset="1"/>
+</linearGradient>
+<linearGradient id="paint1_linear_0_26" x1="0" y1="397" x2="522.004" y2="397" gradientUnits="userSpaceOnUse">
+<stop/>
+<stop offset="0.5" stop-color="#2A2A2A"/>
+<stop offset="1"/>
+</linearGradient>
+<linearGradient id="paint2_linear_0_26" x1="0" y1="67" x2="522.004" y2="67" gradientUnits="userSpaceOnUse">
+<stop/>
+<stop offset="0.5" stop-color="#2A2A2A"/>
+<stop offset="1"/>
+</linearGradient>
+<linearGradient id="paint3_linear_0_26" x1="0" y1="133" x2="522.004" y2="133" gradientUnits="userSpaceOnUse">
+<stop/>
+<stop offset="0.5" stop-color="#2A2A2A"/>
+<stop offset="1"/>
+</linearGradient>
+<linearGradient id="paint4_linear_0_26" x1="0" y1="199" x2="560" y2="199" gradientUnits="userSpaceOnUse">
+<stop/>
+<stop offset="0.5" stop-color="#2A2A2A"/>
+<stop offset="1"/>
+</linearGradient>
+<linearGradient id="paint5_linear_0_26" x1="0" y1="265" x2="522.004" y2="265" gradientUnits="userSpaceOnUse">
+<stop/>
+<stop offset="0.5" stop-color="#2A2A2A"/>
+<stop offset="1"/>
+</linearGradient>
+<linearGradient id="paint6_linear_0_26" x1="3" y1="1" x2="673" y2="1" gradientUnits="userSpaceOnUse">
+<stop/>
+<stop offset="0.5" stop-color="#2A2A2A" stop-opacity="0.68"/>
+<stop offset="1"/>
+</linearGradient>
+</defs>
+</svg>

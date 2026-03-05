@@ -3,6 +3,7 @@ import "./TradeRouteFrame.css";
 
 const CANVAS_WIDTH = 1920;
 const DEFAULT_MIN_HEIGHT = 1080;
+const FOOTER_HEIGHT = 60;
 
 const getViewportScale = () => {
   const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
@@ -105,7 +106,13 @@ function TradeRouteFrame({ height, minHeight, children, className = "" }) {
   return (
     <div className={`trade-route-screen ${className}`} style={{ "--trade-scale": scale }}>
       <div className="trade-route-stage" style={stageStyle}>
-        <div className="trade-route-canvas" ref={canvasRef} style={{ minHeight: baseMinHeight }}>
+        <div
+          className="trade-route-canvas"
+          ref={canvasRef}
+          style={{
+            minHeight: `max(${baseMinHeight}px, calc((100vh / var(--trade-scale, 1)) - ${FOOTER_HEIGHT}px))`,
+          }}
+        >
           {children}
         </div>
       </div>

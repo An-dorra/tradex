@@ -148,26 +148,95 @@
   color: #273035;
 }
 
-@media (max-width: 760px) {
-  .ct-account-dialog {
-    max-height: calc(100vh - 24px);
+@media (max-width: 768px) {
+  .ct-account-overlay {
+    align-items: flex-start;
+    background: #273035;
+    inset: 48px 0 0;
+    justify-content: stretch;
     overflow-y: auto;
-    padding: 20px 16px 12px;
-    width: calc(100vw - 24px);
+    padding: 11px 12px calc(24px + env(safe-area-inset-bottom));
   }
 
-  .ct-account-header,
-  .ct-account-subtitle,
-  .ct-account-exchange-grid,
-  .ct-account-footer {
+  .ct-account-dialog {
+    background: transparent;
+    border-radius: 0;
+    gap: 12px;
+    height: auto;
+    min-height: calc(100dvh - 48px - 35px);
+    overflow: visible;
+    padding: 0 0 84px;
+    width: 100%;
+  }
+
+  .ct-account-header {
+    align-items: flex-start;
+    height: auto;
+    width: 100%;
+  }
+
+  .ct-account-title {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 28px;
+    padding-left: 12px;
+    position: relative;
+  }
+
+  .ct-account-title::before {
+    background: #07d4aa;
+    border-radius: 0 50px 50px 0;
+    content: "";
+    height: 20px;
+    left: 0;
+    position: absolute;
+    top: 4px;
+    width: 4px;
+  }
+
+  .ct-account-close {
+    display: none;
+  }
+
+  .ct-account-subtitle {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 12px;
+    line-height: 20px;
     width: 100%;
   }
 
   .ct-account-exchange-grid {
+    background: #161d1d;
+    border-radius: 12px;
+    padding: 12px;
     grid-template-columns: 1fr;
+    width: 100%;
   }
 
   .ct-account-exchange.is-single {
     grid-column: auto;
+  }
+
+  .ct-account-exchange-label {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 24px;
+  }
+
+  .ct-account-footer {
+    bottom: calc(24px + env(safe-area-inset-bottom));
+    display: grid;
+    gap: 12px;
+    grid-template-columns: 1fr 1fr;
+    left: 12px;
+    padding: 0;
+    position: fixed;
+    width: calc(100vw - 24px);
+    z-index: 2;
+  }
+
+  .ct-account-btn {
+    font-weight: 700;
+    height: 48px;
   }
 }

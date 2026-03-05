@@ -27,10 +27,34 @@ const inviterRows = [
   },
 ];
 
+const referralHistoryRows = [
+  {
+    address: "qwert...ertyuiop",
+    joinedAt: "2026-02-12 21:42:54",
+    totalVolume: "12345USDT",
+    feesPaid: "12345USDT",
+    rewards: "12345USDT",
+  },
+  {
+    address: "qwert...ertyuiop",
+    joinedAt: "2026-02-12 21:42:54",
+    totalVolume: "12345USDT",
+    feesPaid: "12345USDT",
+    rewards: "12345USDT",
+  },
+  {
+    address: "qwert...ertyuiop",
+    joinedAt: "2026-02-12 21:42:54",
+    totalVolume: "12345USDT",
+    feesPaid: "12345USDT",
+    rewards: "12345USDT",
+  },
+];
+
 function ReferralPage() {
   return (
-    <TradeRouteFrame height={1260}>
-      <div className="route-page-shell">
+    <TradeRouteFrame height={1260} className="referral-route-frame">
+      <div className="route-page-shell referral-page-shell">
         <div>
           <h1 className="route-page-title">Referral Center</h1>
           <p className="route-page-subtitle">
@@ -124,10 +148,18 @@ function ReferralPage() {
 
             {inviterRows.map((row, index) => (
               <div key={`${row.address}-${index}`} className="referral-table-row">
-                <span>{row.address}</span>
-                <span>{row.joinedAt}</span>
-                <span>{row.rate}</span>
-                <span>{row.rewards}</span>
+                <span className="referral-cell" data-label="Inviter's address">
+                  {row.address}
+                </span>
+                <span className="referral-cell" data-label="Date joined">
+                  {row.joinedAt}
+                </span>
+                <span className="referral-cell" data-label="Referral kickback rate">
+                  {row.rate}
+                </span>
+                <span className="referral-cell" data-label="Kickback rewards (USDT)">
+                  {row.rewards}
+                </span>
               </div>
             ))}
 
@@ -185,6 +217,30 @@ function ReferralPage() {
                 Your rewards (USDT)
                 <img src={sortIcon40} alt="" />
               </button>
+            </div>
+
+            {referralHistoryRows.map((row, index) => (
+              <div key={`${row.address}-history-${index}`} className="referral-history-row">
+                <span className="referral-cell" data-label="Friend's address">
+                  {row.address}
+                </span>
+                <span className="referral-cell" data-label="Date joined">
+                  {row.joinedAt}
+                </span>
+                <span className="referral-cell" data-label="Total volume (USDT)">
+                  {row.totalVolume}
+                </span>
+                <span className="referral-cell" data-label="Fees paid (USDT)">
+                  {row.feesPaid}
+                </span>
+                <span className="referral-cell" data-label="Your rewards (USDT)">
+                  {row.rewards}
+                </span>
+              </div>
+            ))}
+
+            <div className="referral-table-pagination">
+              <span className="page-pagination">1/20page</span>
             </div>
           </div>
         </section>

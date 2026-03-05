@@ -47,8 +47,8 @@ function SignalsPage() {
   }, [isStrategyMenuOpen]);
 
   return (
-    <TradeRouteFrame height={1140}>
-      <div className="route-page-shell">
+    <TradeRouteFrame height={1140} className="signals-route-frame">
+      <div className="route-page-shell signals-page-shell">
         <div>
           <h1 className="route-page-title">Signal Square</h1>
           <p className="route-page-subtitle signals-subtitle">
@@ -127,17 +127,33 @@ function SignalsPage() {
           <div className="signals-table-body">
             {signalRows.map((row, index) => (
               <div key={`${row.symbol}-${index}`} className="signals-table-row">
-                <span>02-10 23:43:45</span>
-                <span>{row.symbol}</span>
-                <span>MoreTrendStep</span>
-                <span className="signals-chip is-interval">{row.interval}</span>
-                <span className={`signals-chip ${row.typeClass}`}>{row.type}</span>
-                <span className="signals-price-cell">
-                  <span className="signals-price-label">Push/Real-time Price</span>
-                  <span className="signals-price-value">R:8.7009</span>
-                </span>
-                <span className={`signals-profit ${row.profitClass}`}>{row.profit}</span>
-                <span>5</span>
+                <div className="signals-cell" data-label="Time">
+                  <span>02-10 23:43:45</span>
+                </div>
+                <div className="signals-cell" data-label="Symbol">
+                  <span>{row.symbol}</span>
+                </div>
+                <div className="signals-cell" data-label="Source">
+                  <span>MoreTrendStep</span>
+                </div>
+                <div className="signals-cell" data-label="Interval">
+                  <span className="signals-chip is-interval">{row.interval}</span>
+                </div>
+                <div className="signals-cell" data-label="Type">
+                  <span className={`signals-chip ${row.typeClass}`}>{row.type}</span>
+                </div>
+                <div className="signals-cell signals-cell-price" data-label="Push/Real-time Price">
+                  <span className="signals-price-cell">
+                    <span className="signals-price-label">Push/Real-time Price</span>
+                    <span className="signals-price-value">R:8.7009</span>
+                  </span>
+                </div>
+                <div className="signals-cell" data-label="Profit Rate">
+                  <span className={`signals-profit ${row.profitClass}`}>{row.profit}</span>
+                </div>
+                <div className="signals-cell" data-label="Leverage">
+                  <span>5</span>
+                </div>
               </div>
             ))}
           </div>

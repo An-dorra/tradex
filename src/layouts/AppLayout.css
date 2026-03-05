@@ -5,3 +5,9 @@
 .app-layout-content {
   padding-bottom: 0;
 }
+
+@media (max-width: 768px) {
+  .app-layout--mobile-no-footer .trade-footer-shell {
+    display: none;
+  }
+}

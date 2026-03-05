@@ -109,12 +109,17 @@
   gap: 16px;
 }
 
+.otx-wallet-menu-wrap {
+  position: relative;
+}
+
 .otx-wallet-btn {
   align-items: center;
   background: #07d4aa;
   border: 0;
   border-radius: 8px;
   color: #fff;
+  cursor: pointer;
   display: inline-flex;
   font-size: 16px;
   font-weight: 700;
@@ -122,10 +127,147 @@
   height: 40px;
   justify-content: center;
   padding: 8px 20px;
+  transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
 }
 
 .otx-header--trade .otx-wallet-btn {
   color: #17201f;
+}
+
+.otx-wallet-btn:hover {
+  background: #11e8bc;
+}
+
+.otx-wallet-btn:focus-visible {
+  box-shadow: 0 0 0 2px rgba(7, 212, 170, 0.35);
+  outline: none;
+}
+
+.otx-wallet-btn.is-connected {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: #e7edf3;
+  gap: 10px;
+  height: 48px;
+  min-width: 248px;
+  padding: 0 14px;
+}
+
+.otx-wallet-btn.is-connected:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.otx-wallet-user-avatar {
+  align-items: center;
+  background: radial-gradient(circle at 34% 34%, rgba(7, 212, 170, 0.34) 0%, rgba(7, 212, 170, 0.1) 64%, rgba(7, 212, 170, 0.04) 100%);
+  border: 2px solid rgba(7, 212, 170, 0.5);
+  border-radius: 999px;
+  color: #d9fff6;
+  display: inline-flex;
+  height: 34px;
+  justify-content: center;
+  width: 34px;
+}
+
+.otx-wallet-user-avatar svg {
+  display: block;
+  height: 18px;
+  width: 18px;
+}
+
+.otx-wallet-address {
+  color: #e9edf4;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.otx-wallet-mobile-state {
+  display: none;
+}
+
+.otx-wallet-caret {
+  color: #cfd6de;
+  display: inline-flex;
+  flex: 0 0 auto;
+  margin-left: 2px;
+  transition: transform 160ms ease, color 160ms ease;
+}
+
+.otx-wallet-caret svg {
+  display: block;
+  height: 14px;
+  width: 14px;
+}
+
+.otx-wallet-caret.is-open {
+  color: #f3f7fb;
+  transform: rotate(180deg);
+}
+
+.otx-wallet-dropdown {
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  width: 248px;
+  z-index: 90;
+}
+
+.otx-wallet-dropdown-item {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 12px;
+  color: #ecf1f8;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 14px;
+  font-weight: 600;
+  gap: 12px;
+  line-height: 1;
+  min-height: 46px;
+  padding: 10px 10px;
+  text-align: left;
+  transition: background-color 160ms ease, color 160ms ease;
+  width: 100%;
+}
+
+.otx-wallet-dropdown-item:hover,
+.otx-wallet-dropdown-item:focus-visible {
+  background: linear-gradient(90deg, rgba(7, 212, 170, 0.2) 0%, rgba(7, 212, 170, 0.06) 100%);
+  color: #f8fcff;
+  outline: none;
+}
+
+.otx-wallet-dropdown-item:active {
+  background: linear-gradient(90deg, rgba(7, 212, 170, 0.28) 0%, rgba(7, 212, 170, 0.12) 100%);
+}
+
+.otx-wallet-dropdown-icon {
+  align-items: center;
+  color: #d2dae3;
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 24px;
+  justify-content: center;
+  width: 24px;
+}
+
+.otx-wallet-dropdown-icon svg {
+  display: block;
+  height: 20px;
+  width: 20px;
 }
 
 .otx-wallet-icon {
@@ -156,4 +298,272 @@
   display: block;
   height: 24px;
   width: 24px;
+}
+
+.otx-icon-btn-menu {
+  display: none;
+}
+
+.otx-icon-img-menu {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .otx-header--trade {
+    background: linear-gradient(90deg, #0f1617 0%, #161d1d 100%);
+    border-bottom: 0;
+    height: 48px;
+    left: 0;
+    padding: 9px 12px 9px 17px;
+    transform: none;
+    width: 100%;
+  }
+
+  .otx-header-left {
+    gap: 0;
+  }
+
+  .otx-logo {
+    background: url("/logo.png") no-repeat center / 24px 24px;
+    height: 24px;
+    width: 24px;
+  }
+
+  .otx-logo-img {
+    display: none;
+  }
+
+  .otx-nav {
+    display: none;
+  }
+
+  .otx-header-right {
+    gap: 8px;
+    margin-left: auto;
+  }
+
+  .otx-icon-btn {
+    background: transparent;
+    border-radius: 4px;
+    height: 30px;
+    padding: 0;
+    width: 30px;
+  }
+
+  .otx-icon-btn img {
+    height: 20px;
+    width: 20px;
+  }
+
+  .otx-wallet-btn {
+    border-radius: 4px;
+    color: #161d1d;
+    font-size: 12px;
+    font-weight: 400;
+    height: 30px;
+    line-height: 24px;
+    justify-content: center;
+    order: 2;
+    padding: 0 16px;
+    width: 118px;
+  }
+
+  .otx-wallet-btn:not(.is-connected) span:last-child {
+    white-space: nowrap;
+  }
+
+  .otx-wallet-btn.is-connected {
+    border-radius: 4px;
+    color: #ecf2f8;
+    gap: 6px;
+    height: 30px;
+    min-width: auto;
+    padding: 0 8px;
+    width: auto;
+  }
+
+  .otx-wallet-user-avatar {
+    border-width: 1px;
+    height: 20px;
+    width: 20px;
+  }
+
+  .otx-wallet-user-avatar svg {
+    height: 12px;
+    width: 12px;
+  }
+
+  .otx-wallet-address {
+    display: inline;
+    font-size: 12px;
+  }
+
+  .otx-wallet-mobile-state {
+    display: none;
+  }
+
+  .otx-wallet-caret {
+    display: inline-flex;
+  }
+
+  .otx-wallet-caret svg {
+    height: 12px;
+    width: 12px;
+  }
+
+  .otx-wallet-menu-wrap > .otx-wallet-dropdown {
+    display: none;
+  }
+
+  .otx-wallet-icon {
+    display: none;
+  }
+
+  .otx-icon-btn:not(.otx-icon-btn-menu) {
+    order: 1;
+  }
+
+  .otx-icon-btn-menu {
+    display: inline-flex;
+    left: 46px;
+    position: absolute;
+    top: 9px;
+  }
+
+  .otx-icon-btn-menu .otx-icon-img-menu {
+    height: 18px;
+    width: 18px;
+  }
+
+  .otx-icon-btn-menu .otx-icon-img-menu {
+    display: block;
+  }
+
+  .otx-mobile-menu-overlay {
+    background: rgba(0, 0, 0, 0.56);
+    inset: 48px 0 0;
+  }
+
+  .otx-mobile-menu-panel {
+    backdrop-filter: blur(5px);
+    background: #273035;
+    border-radius: 16px 16px 0 0;
+    box-sizing: border-box;
+    max-height: calc(100dvh - 48px);
+    overflow-y: auto;
+    padding: 12px 12px 0;
+    width: 100%;
+  }
+
+  .otx-mobile-menu-handle {
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 4px 4px 0 0;
+    display: block;
+    height: 2px;
+    margin: 0 auto 12px;
+    width: 57px;
+  }
+
+  .otx-mobile-menu-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .otx-mobile-menu-item {
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    display: flex;
+    font-size: 16px;
+    font-weight: 500;
+    height: 60px;
+    justify-content: center;
+    line-height: 24px;
+    text-decoration: none;
+    transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+  }
+
+  .otx-mobile-menu-item:last-child {
+    border-bottom: 0;
+  }
+
+  .otx-mobile-menu-item:hover,
+  .otx-mobile-menu-item:focus-visible {
+    background: linear-gradient(90deg, rgba(7, 212, 170, 0.18) 0%, rgba(7, 212, 170, 0.06) 68%, rgba(7, 212, 170, 0) 100%);
+    box-shadow: inset 3px 0 0 rgba(7, 212, 170, 0.9);
+    color: #07d4aa;
+    outline: none;
+  }
+
+  .otx-mobile-menu-item:active {
+    background: linear-gradient(90deg, rgba(7, 212, 170, 0.24) 0%, rgba(7, 212, 170, 0.08) 68%, rgba(7, 212, 170, 0) 100%);
+    box-shadow: inset 3px 0 0 rgba(7, 212, 170, 1);
+    color: #07d4aa;
+  }
+
+  .otx-mobile-menu-item.is-active {
+    background: linear-gradient(90deg, rgba(7, 212, 170, 0.16) 0%, rgba(7, 212, 170, 0.05) 68%, rgba(7, 212, 170, 0) 100%);
+    box-shadow: inset 3px 0 0 rgba(7, 212, 170, 0.92);
+    color: #07d4aa;
+  }
+
+  .otx-mobile-wallet-panel {
+    padding: 12px 12px calc(env(safe-area-inset-bottom));
+  }
+
+  .otx-wallet-dropdown--mobile {
+    backdrop-filter: none;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    position: static;
+    width: 100%;
+  }
+
+  .otx-wallet-dropdown--mobile .otx-wallet-dropdown-item {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 500;
+    height: 60px;
+    justify-content: flex-start;
+    line-height: 24px;
+    min-height: 60px;
+    padding: 0 14px;
+  }
+
+  .otx-wallet-dropdown--mobile .otx-wallet-dropdown-item:last-child {
+    border-bottom: 0;
+  }
+
+  .otx-wallet-dropdown--mobile .otx-wallet-dropdown-icon {
+    color: #d2dae3;
+    display: inline-flex;
+    height: 24px;
+    width: 24px;
+  }
+
+  .otx-wallet-dropdown--mobile .otx-wallet-dropdown-icon svg {
+    height: 20px;
+    width: 20px;
+  }
+
+  .otx-wallet-dropdown--mobile .otx-wallet-dropdown-item:hover,
+  .otx-wallet-dropdown--mobile .otx-wallet-dropdown-item:focus-visible {
+    background: linear-gradient(90deg, rgba(7, 212, 170, 0.18) 0%, rgba(7, 212, 170, 0.06) 68%, rgba(7, 212, 170, 0) 100%);
+    box-shadow: inset 3px 0 0 rgba(7, 212, 170, 0.9);
+    color: #07d4aa;
+    outline: none;
+  }
+
+  .otx-wallet-dropdown--mobile .otx-wallet-dropdown-item:active {
+    background: linear-gradient(90deg, rgba(7, 212, 170, 0.24) 0%, rgba(7, 212, 170, 0.08) 68%, rgba(7, 212, 170, 0) 100%);
+    box-shadow: inset 3px 0 0 rgba(7, 212, 170, 1);
+    color: #07d4aa;
+  }
 }

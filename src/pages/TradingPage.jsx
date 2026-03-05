@@ -1,8 +1,16 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { KLineChartPro } from "@klinecharts/pro";
-import "@klinecharts/pro/dist/klinecharts-pro.css";
 import pairBtcIcon from "../assets/icons/pair-btc.png";
 import caretIcon from "../assets/icons/caret.svg";
+import useIsMobileViewport from "../hooks/useIsMobileViewport.js";
+import useClickOutside from "../hooks/useClickOutside.js";
+import TradeOrderFormContent from "../components/TradeOrderFormContent.jsx";
+import {
+  BTC_SYMBOL,
+  CHART_PERIODS,
+  DEFAULT_CHART_PERIOD,
+  createLocalBtcDatafeed,
+  loadKlineChartPro,
+} from "./tradingChartDatafeed.js";
 import "./TradingPage.css";
 
 const CANVAS_WIDTH = 1920;
@@ -49,37 +57,6 @@ const measureCanvasHeight = (canvas) => {
   return Math.ceil(nextHeight);
 };
 
-const BTC_SYMBOL = {
-  ticker: "BTC",
-  name: "BTC",
-  shortName: "BTC",
-  market: "crypto",
-  type: "crypto",
-  pricePrecision: 1,
-  volumePrecision: 4,
-  priceCurrency: "USDC",
-};
-
-const CHART_PERIODS = [
-  { multiplier: 1, timespan: "minute", text: "1m" },
-  { multiplier: 5, timespan: "minute", text: "5m" },
-  { multiplier: 15, timespan: "minute", text: "15m" },
-  { multiplier: 1, timespan: "hour", text: "1H" },
-  { multiplier: 4, timespan: "hour", text: "4H" },
-  { multiplier: 1, timespan: "day", text: "D" },
-];
-
-const DEFAULT_PERIOD = CHART_PERIODS[0];
-
-const PERIOD_STEP_MS = {
-  minute: 60 * 1000,
-  hour: 60 * 60 * 1000,
-  day: 24 * 60 * 60 * 1000,
-  week: 7 * 24 * 60 * 60 * 1000,
-  month: 30 * 24 * 60 * 60 * 1000,
-  year: 365 * 24 * 60 * 60 * 1000,
-};
-
 const marketStats = [
   { label: "Mark", value: "69291.0" },
   { label: "Oracle", value: "69291.0" },
@@ -98,12 +75,43 @@ const tableTabs = [
   { id: "apiLimits", label: "API Limits" },
 ];
 
+const mobileMainTabs = [
+  { id: "chart", label: "Chart" },
+  { id: "orderBook", label: "Order Book" },
+  { id: "trades", label: "Trades" },
+];
+
+const mobileTableTabs = tableTabs;
+const mobileSymbolInfoRows = [
+  [
+    { label: "Mark", value: "69291.0" },
+    { label: "Oracle", value: "69291.0" },
+  ],
+  [
+    { label: "24h Volume", value: "$2.51B" },
+    { label: "Open Interest", value: "$2.51B" },
+  ],
+  [{ label: "Funding / Countdown", value: "0.0009%/ 34:18" }],
+];
+
 const tradePrintRows = Array.from({ length: 24 }, (_, index) => ({
   price: "34567",
   size: "0.00",
   time: "00:08:22",
   side: index % 5 === 0 || index % 5 === 1 ? "sell" : "buy",
 }));
+
+const mobileTradesRows = [
+  { price: "32.223", size: "2.00", time: "23:59:55", side: "buy" },
+  { price: "32.223", size: "2.00", time: "23:59:55", side: "buy" },
+  { price: "32.223", size: "2.00", time: "23:59:55", side: "buy" },
+  { price: "32.223", size: "2.00", time: "23:59:55", side: "sell" },
+  { price: "32.223", size: "2.00", time: "23:59:55", side: "buy" },
+  { price: "32.223", size: "2.00", time: "23:59:55", side: "buy" },
+  { price: "32.223", size: "2.00", time: "23:59:55", side: "sell" },
+  { price: "32.223", size: "2.00", time: "23:59:55", side: "buy" },
+  { price: "32.223", size: "2.00", time: "23:59:55", side: "buy" },
+];
 
 const orderBookBidRows = Array.from({ length: 11 }, () => ({
   price: "34567",
@@ -116,6 +124,25 @@ const orderBookAskRows = Array.from({ length: 11 }, () => ({
   size: "0.0000",
   ratio: "0.0005%",
 }));
+
+const mobileOrderBookDepthRows = [
+  { total: "89.44", price: "32.124" },
+  { total: "89.44", price: "32.124" },
+  { total: "89.44", price: "32.124" },
+  { total: "994.23", price: "32.124" },
+  { total: "1,489.44", price: "32.124" },
+  { total: "3,489.44", price: "32.124" },
+  { total: "3,489.44", price: "32.124" },
+  { total: "3,489.44", price: "32.124" },
+  { total: "3,489.44", price: "32.124" },
+  { total: "3,489.44", price: "32.124" },
+];
+
+const mobileOrderBookDepthBarWidths = [10, 24, 34, 48, 62, 83, 83, 83, 83, 83];
+const mobileOrderBookSizeOptions = ["0.001", "0.005", "0.01", "0.1"];
+const mobileOrderBookSymbolOptions = ["HYPE", "BTC", "ETH", "SOL"];
+const quantityUnitOptions = ["USDC", "BTC", "ETH", "SOL"];
+const tifUnitOptions = quantityUnitOptions;
 
 const tableRows = [
   {
@@ -237,10 +264,12 @@ const apiLimitsDetailCards = [
   { label: "Surplus", value: "0" },
 ];
 
-const summaryRows = [
+const accountEquityRows = [
   { label: "Spot", value: "$0.00" },
   { label: "Perps", value: "$0.00" },
-  { label: "Perps Overview", value: "" },
+];
+
+const perpsOverviewRows = [
   { label: "Balance", value: "$0.00" },
   { label: "Unrealized PNL", value: "$0.00" },
   { label: "Cross Margin Ratio", value: "0.00%", highlight: true },
@@ -248,116 +277,18 @@ const summaryRows = [
   { label: "Cross Account Leverage", value: "0.00x" },
 ];
 
-const getPeriodStepMs = (period) => {
-  const base = PERIOD_STEP_MS[period.timespan] ?? PERIOD_STEP_MS.minute;
-  return base * period.multiplier;
-};
-
-const alignToPeriod = (timestamp, stepMs) => Math.floor(timestamp / stepMs) * stepMs;
-
-const getSyntheticPrice = (candleIndex) => {
-  const base = 69200;
-  const trend = Math.sin(candleIndex / 36) * 420;
-  const wave = Math.cos(candleIndex / 10) * 110;
-  return base + trend + wave;
-};
-
-const buildBtcCandle = (timestamp, stepMs, includeLiveNoise = false) => {
-  const candleIndex = Math.floor(timestamp / stepMs);
-  const open = getSyntheticPrice(candleIndex - 1);
-  const baseClose = getSyntheticPrice(candleIndex);
-  const liveNoise = includeLiveNoise ? Math.sin(Date.now() / 3000) * 12 : 0;
-  const close = baseClose + liveNoise;
-  const high = Math.max(open, close) + 18 + Math.abs(Math.sin(candleIndex * 1.8)) * 26;
-  const low = Math.min(open, close) - 18 - Math.abs(Math.cos(candleIndex * 1.1)) * 24;
-  const volume = 180 + Math.abs(Math.sin(candleIndex * 0.33)) * 420;
-
-  return {
-    timestamp,
-    open: Number(open.toFixed(2)),
-    high: Number(high.toFixed(2)),
-    low: Number(low.toFixed(2)),
-    close: Number(close.toFixed(2)),
-    volume: Number(volume.toFixed(2)),
-  };
-};
-
-class LocalBtcDatafeed {
-  constructor() {
-    this.subscriptions = new Map();
-  }
-
-  async searchSymbols(search = "") {
-    const keyword = search.trim().toLowerCase();
-    if (
-      !keyword ||
-      "btc".includes(keyword) ||
-      "bitcoin".includes(keyword) ||
-      BTC_SYMBOL.ticker.toLowerCase().includes(keyword)
-    ) {
-      return [BTC_SYMBOL];
-    }
-    return [];
-  }
-
-  async getHistoryKLineData(symbol, period, from, to) {
-    if ((symbol?.ticker ?? "").toUpperCase() !== BTC_SYMBOL.ticker) {
-      return [];
-    }
-
-    const stepMs = getPeriodStepMs(period);
-    const rangeStart = Math.min(from, to);
-    const rangeEnd = Math.max(from, to);
-    const start = alignToPeriod(rangeStart, stepMs);
-    const end = alignToPeriod(rangeEnd, stepMs);
-
-    const candles = [];
-    for (let ts = start; ts <= end; ts += stepMs) {
-      candles.push(buildBtcCandle(ts, stepMs));
-    }
-    return candles;
-  }
-
-  subscribe(symbol, period, callback) {
-    this.unsubscribe(symbol, period);
-    const key = this.createSubscriptionKey(symbol, period);
-    const stepMs = getPeriodStepMs(period);
-    const emit = () => {
-      const timestamp = alignToPeriod(Date.now(), stepMs);
-      callback(buildBtcCandle(timestamp, stepMs, true));
-    };
-
-    emit();
-    const timerId = window.setInterval(emit, 1000);
-    this.subscriptions.set(key, timerId);
-  }
-
-  unsubscribe(symbol, period) {
-    const key = this.createSubscriptionKey(symbol, period);
-    const timerId = this.subscriptions.get(key);
-    if (timerId) {
-      window.clearInterval(timerId);
-      this.subscriptions.delete(key);
-    }
-  }
-
-  dispose() {
-    this.subscriptions.forEach((timerId) => {
-      window.clearInterval(timerId);
-    });
-    this.subscriptions.clear();
-  }
-
-  createSubscriptionKey(symbol, period) {
-    return `${symbol.ticker}:${period.multiplier}:${period.timespan}`;
-  }
-}
+const summaryRows = [...accountEquityRows, { label: "Perps Overview", value: "" }, ...perpsOverviewRows];
 
 function TradingPage() {
   const screenRef = useRef(null);
   const canvasRef = useRef(null);
-  const chartHostRef = useRef(null);
+  const desktopChartHostRef = useRef(null);
+  const mobileChartHostRef = useRef(null);
   const leverageTrackRef = useRef(null);
+  const mobileOrderBookSizeWrapRef = useRef(null);
+  const mobileOrderBookSymbolWrapRef = useRef(null);
+  const quantityUnitWrapRef = useRef(null);
+  const tifUnitWrapRef = useRef(null);
   const [scale, setScale] = useState(getInitialScale);
   const [contentHeight, setContentHeight] = useState(CANVAS_HEIGHT);
   const [leverage, setLeverage] = useState(80);
@@ -367,16 +298,71 @@ function TradingPage() {
   const [orderSide, setOrderSide] = useState("buy");
   const [orderType, setOrderType] = useState("market");
   const [bookTab, setBookTab] = useState("orderBook");
+  const [mobileMainTab, setMobileMainTab] = useState("chart");
+  const [mobileBottomTab, setMobileBottomTab] = useState("trade");
   const [tableTab, setTableTab] = useState("balance");
+  const [isMobileSymbolInfoOpen, setIsMobileSymbolInfoOpen] = useState(false);
+  const [mobileOrderBookSize, setMobileOrderBookSize] = useState(mobileOrderBookSizeOptions[0]);
+  const [mobileOrderBookSymbol, setMobileOrderBookSymbol] = useState(mobileOrderBookSymbolOptions[0]);
+  const [mobileOrderBookDropdown, setMobileOrderBookDropdown] = useState(null);
+  const [quantityUnit, setQuantityUnit] = useState(quantityUnitOptions[0]);
+  const [isQuantityUnitMenuOpen, setIsQuantityUnitMenuOpen] = useState(false);
+  const [tifUnit, setTifUnit] = useState(tifUnitOptions[0]);
+  const [isTifMenuOpen, setIsTifMenuOpen] = useState(false);
+  const isMobileViewport = useIsMobileViewport();
   const isSellSide = orderSide === "sell";
   const isLimitType = orderType === "limit";
   const isTradesBookTab = bookTab === "trades";
+  const isMobileOrderBookMainTab = mobileMainTab === "orderBook";
+  const isMobileTradesMainTab = mobileMainTab === "trades";
+  const isMobileChartMainTab = mobileMainTab === "chart";
+  const isMobileBottomMarketsTab = mobileBottomTab === "markets";
+  const isMobileBottomTradeTab = mobileBottomTab === "trade";
+  const isMobileBottomAccountTab = mobileBottomTab === "account";
   const isBalanceTab = tableTab === "balance";
   const isPositionsTab = tableTab === "positions";
   const isOpenOrdersTab = tableTab === "openOrders";
   const isTradeHistoryTab = tableTab === "tradeHistory";
   const isOrderHistoryTab = tableTab === "orderHistory";
   const isApiLimitsTab = tableTab === "apiLimits";
+
+  const handleQuantityChange = useCallback((nextValue) => {
+    if (nextValue === "" || /^\d*\.?\d*$/.test(nextValue)) {
+      setQuantityInput(nextValue);
+    }
+  }, []);
+
+  const handleOrderTypeChange = useCallback((nextOrderType) => {
+    setOrderType(nextOrderType);
+  }, []);
+
+  const handleOrderSideChange = useCallback((nextOrderSide) => {
+    setOrderSide(nextOrderSide);
+  }, []);
+
+  const handleReduceOnlyToggle = useCallback(() => {
+    setReduceOnly((value) => !value);
+  }, []);
+
+  const handleQuantityUnitToggle = useCallback(() => {
+    setIsTifMenuOpen(false);
+    setIsQuantityUnitMenuOpen((prev) => !prev);
+  }, []);
+
+  const handleQuantityUnitSelect = useCallback((nextUnit) => {
+    setQuantityUnit(nextUnit);
+    setIsQuantityUnitMenuOpen(false);
+  }, []);
+
+  const handleTifUnitToggle = useCallback(() => {
+    setIsQuantityUnitMenuOpen(false);
+    setIsTifMenuOpen((prev) => !prev);
+  }, []);
+
+  const handleTifUnitSelect = useCallback((nextUnit) => {
+    setTifUnit(nextUnit);
+    setIsTifMenuOpen(false);
+  }, []);
 
   const syncContentHeight = useCallback(() => {
     const measuredHeight = Math.max(CANVAS_HEIGHT, measureCanvasHeight(canvasRef.current));
@@ -395,15 +381,31 @@ function TradingPage() {
     setLeverageInput(String(next));
   };
 
-  const handleTrackMouseDown = (e) => {
+  const handleTrackPointerDown = (e) => {
+    e.preventDefault();
+    const pointerId = e.pointerId;
+
     updateLeverageFromClientX(e.clientX);
-    const onMove = (ev) => updateLeverageFromClientX(ev.clientX);
-    const onUp = () => {
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
+
+    const onMove = (ev) => {
+      if (ev.pointerId !== pointerId) {
+        return;
+      }
+      updateLeverageFromClientX(ev.clientX);
     };
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
+
+    const onUp = (ev) => {
+      if (ev.pointerId !== pointerId) {
+        return;
+      }
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
+    };
+
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
   };
 
   const handleLeverageInput = (e) => {
@@ -427,8 +429,49 @@ function TradingPage() {
     setLeverageInput(String(next));
   };
 
+  useClickOutside(Boolean(mobileOrderBookDropdown), [mobileOrderBookSizeWrapRef, mobileOrderBookSymbolWrapRef], () => {
+    setMobileOrderBookDropdown(null);
+  });
+
+  useEffect(() => {
+    if (!isMobileOrderBookMainTab) {
+      setMobileOrderBookDropdown(null);
+    }
+  }, [isMobileOrderBookMainTab]);
+
+  useEffect(() => {
+    if (mobileMainTab === "chart") {
+      return;
+    }
+
+    const nextMobileMainTab = isTradesBookTab ? "trades" : "orderBook";
+    setMobileMainTab((prev) => (prev === nextMobileMainTab ? prev : nextMobileMainTab));
+  }, [mobileMainTab, isTradesBookTab]);
+
+  useEffect(() => {
+    if (isMobileViewport && !isMobileBottomTradeTab) {
+      setIsQuantityUnitMenuOpen(false);
+      setIsTifMenuOpen(false);
+    }
+  }, [isMobileBottomTradeTab, isMobileViewport]);
+
+  useEffect(() => {
+    if (!isLimitType) {
+      setIsTifMenuOpen(false);
+    }
+  }, [isLimitType]);
+
+  useClickOutside(isQuantityUnitMenuOpen || isTifMenuOpen, [quantityUnitWrapRef, tifUnitWrapRef], () => {
+    setIsQuantityUnitMenuOpen(false);
+    setIsTifMenuOpen(false);
+  });
+
   useLayoutEffect(() => {
     const updateScale = () => {
+      if (isMobileViewport) {
+        setScale(1);
+        return;
+      }
       setScale(getViewportScale());
     };
 
@@ -438,43 +481,71 @@ function TradingPage() {
     return () => {
       window.removeEventListener("resize", updateScale);
     };
-  }, []);
+  }, [isMobileViewport]);
 
   useLayoutEffect(() => {
+    if (isMobileViewport) {
+      return;
+    }
     document.documentElement.style.setProperty("--trade-scale", String(scale));
-  }, [scale]);
+  }, [isMobileViewport, scale]);
 
   useLayoutEffect(() => {
+    if (isMobileViewport) {
+      return;
+    }
     syncContentHeight();
-  }, [syncContentHeight, scale, tableTab, bookTab, orderType]);
+  }, [isMobileViewport, syncContentHeight, scale, tableTab, bookTab, orderType]);
 
   useEffect(() => {
-    const host = chartHostRef.current;
+    if (isMobileViewport && (!isMobileBottomMarketsTab || !isMobileChartMainTab)) {
+      return undefined;
+    }
+
+    const host = isMobileViewport ? mobileChartHostRef.current : desktopChartHostRef.current;
     if (!host) {
       return undefined;
     }
 
+    let isDisposed = false;
+    let datafeed;
     host.innerHTML = "";
-    const datafeed = new LocalBtcDatafeed();
 
-    new KLineChartPro({
-      container: host,
-      theme: "dark",
-      locale: "en-US",
-      timezone: "Etc/UTC",
-      symbol: BTC_SYMBOL,
-      period: DEFAULT_PERIOD,
-      periods: CHART_PERIODS,
-      mainIndicators: ["MA"],
-      subIndicators: ["VOL"],
-      datafeed,
+    const initChart = async () => {
+      const KLineChartPro = await loadKlineChartPro();
+
+      if (isDisposed) {
+        return;
+      }
+
+      datafeed = createLocalBtcDatafeed();
+
+      new KLineChartPro({
+        container: host,
+        theme: "dark",
+        locale: "en-US",
+        timezone: "Etc/UTC",
+        symbol: BTC_SYMBOL,
+        period: isMobileViewport ? CHART_PERIODS[1] : DEFAULT_CHART_PERIOD,
+        periods: CHART_PERIODS,
+        mainIndicators: isMobileViewport ? [] : ["MA"],
+        subIndicators: isMobileViewport ? [] : ["VOL"],
+        datafeed,
+      });
+    };
+
+    initChart().catch(() => {
+      if (!isDisposed) {
+        host.innerHTML = "";
+      }
     });
 
     return () => {
-      datafeed.dispose();
+      isDisposed = true;
+      datafeed?.dispose();
       host.innerHTML = "";
     };
-  }, []);
+  }, [isMobileChartMainTab, isMobileViewport, isMobileBottomMarketsTab]);
 
   const stageStyle = {
     width: CANVAS_WIDTH * scale,
@@ -485,6 +556,523 @@ function TradingPage() {
     "--trade-scale": scale,
     minHeight: CANVAS_HEIGHT,
   };
+
+  if (isMobileViewport) {
+    return (
+      <div className={`trade-mobile-screen${isMobileBottomAccountTab ? " is-account" : ""}`} ref={screenRef}>
+        <div className="trade-mobile-shell">
+          {!isMobileBottomAccountTab ? (
+            <>
+              <section className="trade-mobile-summary">
+                <div className="trade-mobile-summary-head">
+                  <p className="trade-mobile-summary-title">Summary of invitations</p>
+                  <button className="trade-mobile-date-filter" type="button">
+                    <span className="trade-mobile-date-filter-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none">
+                        <path
+                          d="M4 5h16l-5.5 6.5V18l-5 2v-8.5L4 5Z"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinejoin="round"
+                        />
+                        <path d="M20 7h-2.5M20 11h-2.5M20 15h-2.5" stroke="currentColor" strokeLinecap="round" strokeWidth="1.5" />
+                      </svg>
+                    </span>
+                    <span>Date</span>
+                  </button>
+                </div>
+                <div className="trade-mobile-market-row">
+                  <div className="trade-mobile-market-main">
+                    <div className="trade-mobile-market-icon">
+                      <img src={pairBtcIcon} alt="" />
+                    </div>
+                    <div className="trade-mobile-market-text">
+                      <div className="trade-mobile-market-name-row">
+                        <span>BTC-USDC</span>
+                        <span className="trade-mobile-market-caret" aria-hidden="true">
+                          <img src={caretIcon} alt="" />
+                        </span>
+                      </div>
+                      <span className="trade-mobile-market-leverage">40x</span>
+                    </div>
+                  </div>
+                  <div className="trade-mobile-market-change">
+                    <span className="trade-mobile-market-label">24h Change</span>
+                    <span className="trade-mobile-market-value">+325.00/+0.47%</span>
+                  </div>
+                  <button
+                    className={`trade-mobile-market-expand${isMobileSymbolInfoOpen ? " is-expanded" : ""}`}
+                    type="button"
+                    aria-label="Toggle symbol information"
+                    aria-expanded={isMobileSymbolInfoOpen}
+                    onClick={() => setIsMobileSymbolInfoOpen((prev) => !prev)}
+                  >
+                    <svg viewBox="0 0 16 16" fill="none">
+                      <path d="M4.4 6.1 8 9.7l3.6-3.6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.4" />
+                    </svg>
+                  </button>
+                </div>
+                {isMobileSymbolInfoOpen ? (
+                  <div className="trade-mobile-symbol-info">
+                    {mobileSymbolInfoRows.map((row, rowIndex) => (
+                      <div key={`symbol-info-row-${rowIndex}`} className="trade-mobile-symbol-info-row">
+                        {row.map((item) => (
+                          <div key={item.label} className="trade-mobile-symbol-info-item">
+                            <span className="trade-mobile-symbol-info-label">{item.label}</span>
+                            <span className="trade-mobile-symbol-info-value">{item.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </section>
+
+              {isMobileBottomMarketsTab ? (
+                <section className="trade-mobile-chart-card">
+                  <div className="trade-mobile-main-tabs">
+                    {mobileMainTabs.map((tab) => (
+                      <button
+                        key={tab.id}
+                        className={mobileMainTab === tab.id ? "is-active" : ""}
+                        onClick={() => {
+                          setMobileMainTab(tab.id);
+                          if (tab.id === "orderBook") {
+                            setBookTab("orderBook");
+                          }
+                          if (tab.id === "trades") {
+                            setBookTab("trades");
+                          }
+                        }}
+                        type="button"
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="trade-mobile-kline-container">
+                    <div className="trade-mobile-main-panel">
+                      {isMobileChartMainTab ? (
+                        <section className="trade-mobile-pro-chart-shell" ref={mobileChartHostRef} />
+                      ) : null}
+
+                      {isMobileOrderBookMainTab ? (
+                        <div className="trade-mobile-order-book-panel">
+                          <div className="trade-mobile-order-book-top">
+                            <div className="trade-mobile-order-book-select-wrap" ref={mobileOrderBookSizeWrapRef}>
+                              <button
+                                className={`trade-mobile-order-book-select${mobileOrderBookDropdown === "size" ? " is-open" : ""}`}
+                                type="button"
+                                aria-expanded={mobileOrderBookDropdown === "size"}
+                                onClick={() => setMobileOrderBookDropdown((prev) => (prev === "size" ? null : "size"))}
+                              >
+                                <span>{mobileOrderBookSize}</span>
+                                <span className="trade-mobile-order-book-select-caret" aria-hidden="true">
+                                  <img src={caretIcon} alt="" />
+                                </span>
+                              </button>
+                              {mobileOrderBookDropdown === "size" ? (
+                                <div className="trade-mobile-order-book-dropdown" role="listbox" aria-label="Order size">
+                                  {mobileOrderBookSizeOptions.map((option) => (
+                                    <button
+                                      key={option}
+                                      className={`trade-mobile-order-book-option${mobileOrderBookSize === option ? " is-active" : ""}`}
+                                      type="button"
+                                      role="option"
+                                      aria-selected={mobileOrderBookSize === option}
+                                      onClick={() => {
+                                        setMobileOrderBookSize(option);
+                                        setMobileOrderBookDropdown(null);
+                                      }}
+                                    >
+                                      {option}
+                                    </button>
+                                  ))}
+                                </div>
+                              ) : null}
+                            </div>
+
+                            <div className="trade-mobile-order-book-select-wrap is-end" ref={mobileOrderBookSymbolWrapRef}>
+                              <button
+                                className={`trade-mobile-order-book-select${mobileOrderBookDropdown === "symbol" ? " is-open" : ""}`}
+                                type="button"
+                                aria-expanded={mobileOrderBookDropdown === "symbol"}
+                                onClick={() => setMobileOrderBookDropdown((prev) => (prev === "symbol" ? null : "symbol"))}
+                              >
+                                <span>{mobileOrderBookSymbol}</span>
+                                <span className="trade-mobile-order-book-select-caret" aria-hidden="true">
+                                  <img src={caretIcon} alt="" />
+                                </span>
+                              </button>
+                              {mobileOrderBookDropdown === "symbol" ? (
+                                <div className="trade-mobile-order-book-dropdown" role="listbox" aria-label="Order symbol">
+                                  {mobileOrderBookSymbolOptions.map((option) => (
+                                    <button
+                                      key={option}
+                                      className={`trade-mobile-order-book-option${mobileOrderBookSymbol === option ? " is-active" : ""}`}
+                                      type="button"
+                                      role="option"
+                                      aria-selected={mobileOrderBookSymbol === option}
+                                      onClick={() => {
+                                        setMobileOrderBookSymbol(option);
+                                        setMobileOrderBookDropdown(null);
+                                      }}
+                                    >
+                                      {option}
+                                    </button>
+                                  ))}
+                                </div>
+                              ) : null}
+                            </div>
+                          </div>
+
+                          <div className="trade-mobile-order-book-depth-wrap">
+                            <div className="trade-mobile-order-book-depth-side">
+                              <div className="trade-mobile-order-book-depth-head">
+                                <span>{`Total (${mobileOrderBookSymbol})`}</span>
+                                <span>Price</span>
+                              </div>
+                              <div className="trade-mobile-order-book-depth-list">
+                                {mobileOrderBookDepthRows.map((row, index) => (
+                                  <div key={`mobile-bid-depth-${index}`} className="trade-mobile-order-book-depth-row is-bid">
+                                    <span
+                                      className="trade-mobile-order-book-depth-bg"
+                                      style={{ width: `${mobileOrderBookDepthBarWidths[index] ?? 10}px` }}
+                                      aria-hidden="true"
+                                    />
+                                    <span className="trade-mobile-order-book-depth-total">{row.total}</span>
+                                    <span className="trade-mobile-order-book-depth-price">{row.price}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            <div className="trade-mobile-order-book-depth-side">
+                              <div className="trade-mobile-order-book-depth-head">
+                                <span>Price</span>
+                                <span>{`Total (${mobileOrderBookSymbol})`}</span>
+                              </div>
+                              <div className="trade-mobile-order-book-depth-list">
+                                {mobileOrderBookDepthRows.map((row, index) => (
+                                  <div key={`mobile-ask-depth-${index}`} className="trade-mobile-order-book-depth-row is-ask">
+                                    <span
+                                      className="trade-mobile-order-book-depth-bg"
+                                      style={{ width: `${mobileOrderBookDepthBarWidths[index] ?? 10}px` }}
+                                      aria-hidden="true"
+                                    />
+                                    <span className="trade-mobile-order-book-depth-price">{row.price}</span>
+                                    <span className="trade-mobile-order-book-depth-total">{row.total}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ) : null}
+
+                      {isMobileTradesMainTab ? (
+                        <div className="trade-mobile-trades-panel">
+                          <div className="trade-mobile-trades-head">
+                            <span>Price</span>
+                            <span>{`Size (${mobileOrderBookSymbol})`}</span>
+                            <span>Time</span>
+                          </div>
+                          <div className="trade-mobile-trades-list">
+                            {mobileTradesRows.map((row, index) => (
+                              <div key={`mobile-trade-${index}`} className="trade-mobile-trades-row">
+                                <span className={`trade-mobile-trades-price${row.side === "sell" ? " is-sell" : " is-buy"}`}>{row.price}</span>
+                                <span className="trade-mobile-trades-size">{row.size}</span>
+                                <span className="trade-mobile-trades-time-wrap">
+                                  <span className="trade-mobile-trades-time">{row.time}</span>
+                                  <span className="trade-mobile-trades-share" aria-hidden="true">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                      <path
+                                        d="M11.6667 4.16675H15.8333V8.33341"
+                                        stroke="#07D4AA"
+                                        strokeWidth="1.4"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      />
+                                      <path
+                                        d="M8.3335 11.6667L15.4168 4.58337"
+                                        stroke="#07D4AA"
+                                        strokeWidth="1.4"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      />
+                                      <path
+                                        d="M15.8333 11.6667V15.8334H4.16667V4.16675H8.33333"
+                                        stroke="#07D4AA"
+                                        strokeWidth="1.4"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      />
+                                    </svg>
+                                  </span>
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                </section>
+              ) : null}
+
+              {isMobileBottomTradeTab ? (
+                <section className={`trade-mobile-order-card${isSellSide || isLimitType ? " is-sell" : ""}`}>
+                  <TradeOrderFormContent
+                    isLimitType={isLimitType}
+                    isSellSide={isSellSide}
+                    reduceOnly={reduceOnly}
+                    quantityInput={quantityInput}
+                    leverage={leverage}
+                    leverageInput={leverageInput}
+                    quantityUnit={quantityUnit}
+                    tifUnit={tifUnit}
+                    quantityUnitOptions={quantityUnitOptions}
+                    tifUnitOptions={tifUnitOptions}
+                    isQuantityUnitMenuOpen={isQuantityUnitMenuOpen}
+                    isTifMenuOpen={isTifMenuOpen}
+                    leverageTrackRef={leverageTrackRef}
+                    quantityUnitWrapRef={quantityUnitWrapRef}
+                    tifUnitWrapRef={tifUnitWrapRef}
+                    onOrderTypeChange={handleOrderTypeChange}
+                    onOrderSideChange={handleOrderSideChange}
+                    onQuantityChange={handleQuantityChange}
+                    onQuantityUnitToggle={handleQuantityUnitToggle}
+                    onQuantityUnitSelect={handleQuantityUnitSelect}
+                    onLeverageTrackPointerDown={handleTrackPointerDown}
+                    onLeverageInputChange={handleLeverageInput}
+                    onLeverageBlur={handleLeverageBlur}
+                    onReduceOnlyToggle={handleReduceOnlyToggle}
+                    onTifUnitToggle={handleTifUnitToggle}
+                    onTifUnitSelect={handleTifUnitSelect}
+                  />
+                </section>
+              ) : null}
+
+              <section className="trade-mobile-balance-card">
+                <div className="trade-mobile-table-tabs" role="tablist" aria-label="Trade table tabs">
+                  {mobileTableTabs.map((tab) => (
+                    <button
+                      key={tab.id}
+                      className={tableTab === tab.id ? "is-active" : ""}
+                      onClick={() => setTableTab(tab.id)}
+                      type="button"
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="trade-mobile-balance-content">
+                  <div className={`trade-mobile-table-scroll is-${tableTab}`}>
+                    {isBalanceTab ? (
+                      <>
+                        <div className="trade-mobile-balance-head trade-mobile-balance-grid">
+                          <span>Coin</span>
+                          <span>Total Balance</span>
+                          <span>Available</span>
+                          <span>USDC Value</span>
+                          <span>PnL</span>
+                          <span>Send</span>
+                          <span>Transfer</span>
+                          <span>Contract</span>
+                        </div>
+                        <div className="trade-mobile-balance-body">
+                          {tableRows.map((row, index) => (
+                            <div key={`mobile-balance-${index}`} className="trade-mobile-balance-row trade-mobile-balance-grid">
+                              <span>{row.coin}</span>
+                              <span>{row.total}</span>
+                              <span>{row.available}</span>
+                              <span>{row.value}</span>
+                              <span className="value-green">{row.pnl}</span>
+                              <span className="value-teal">{row.send}</span>
+                              <span className="value-teal">{row.transfer}</span>
+                              <span>{row.contract}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    ) : null}
+
+                    {isPositionsTab ? (
+                      <>
+                        <div className="trade-mobile-generic-head trade-mobile-positions-grid">
+                          {positionsColumns.map((column) => (
+                            <span key={column}>{column}</span>
+                          ))}
+                        </div>
+                        <div className="trade-mobile-empty-state">No open positions</div>
+                      </>
+                    ) : null}
+
+                    {isOpenOrdersTab ? (
+                      <>
+                        <div className="trade-mobile-generic-head trade-mobile-open-orders-grid">
+                          {openOrdersColumns.map((column) => (
+                            <span key={column}>{column}</span>
+                          ))}
+                        </div>
+                        <div className="trade-mobile-empty-state">No open orders</div>
+                      </>
+                    ) : null}
+
+                    {isTradeHistoryTab ? (
+                      <>
+                        <div className="trade-mobile-generic-head trade-mobile-trade-history-grid">
+                          {tradeHistoryColumns.map((column) => (
+                            <span key={column}>{column}</span>
+                          ))}
+                        </div>
+                        <div className="trade-mobile-history-body">
+                          {tradeHistoryRows.map((row, index) => (
+                            <div key={`${row.time}-${row.coin}-${index}`} className="trade-mobile-generic-row trade-mobile-trade-history-grid">
+                              <span>{row.time}</span>
+                              <span className={row.coinTone}>{row.coin}</span>
+                              <span className={row.sideTone}>{row.side}</span>
+                              <span>{row.price}</span>
+                              <span>{row.size}</span>
+                              <span>{row.value}</span>
+                              <span className={row.pnlTone}>{row.realizedPnl}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    ) : null}
+
+                    {isOrderHistoryTab ? (
+                      <>
+                        <div className="trade-mobile-generic-head trade-mobile-order-history-grid">
+                          {orderHistoryColumns.map((column) => (
+                            <span key={column}>{column}</span>
+                          ))}
+                        </div>
+                        <div className="trade-mobile-history-body">
+                          {orderHistoryRows.map((row, index) => (
+                            <div key={`${row.time}-${row.orderId}-${index}`} className="trade-mobile-generic-row trade-mobile-order-history-grid">
+                              <span>{row.time}</span>
+                              <span>{row.type}</span>
+                              <span className={row.coinTone}>{row.coin}</span>
+                              <span className={row.sideTone}>{row.side}</span>
+                              <span>{row.size}</span>
+                              <span>{row.value}</span>
+                              <span>{row.price}</span>
+                              <span>{row.reduce}</span>
+                              <span className={row.statusTone}>{row.status}</span>
+                              <span>{row.orderId}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    ) : null}
+
+                    {isApiLimitsTab ? <div className="trade-mobile-empty-state">No data</div> : null}
+                  </div>
+                </div>
+              </section>
+            </>
+          ) : (
+            <>
+              <section className="trade-mobile-account-card">
+                <p className="trade-mobile-account-title">Account Equity</p>
+                {accountEquityRows.map((item) => (
+                  <div key={`mobile-account-equity-${item.label}`} className="trade-mobile-account-row">
+                    <span>{item.label}</span>
+                    <span>{item.value}</span>
+                  </div>
+                ))}
+              </section>
+
+              <section className="trade-mobile-account-card">
+                <p className="trade-mobile-account-title">Perps Overview</p>
+                {perpsOverviewRows.map((item) => (
+                  <div key={`mobile-perps-overview-${item.label}`} className="trade-mobile-account-row">
+                    <span>{item.label}</span>
+                    <span className={item.highlight ? "is-highlight" : ""}>{item.value}</span>
+                  </div>
+                ))}
+              </section>
+            </>
+          )}
+        </div>
+
+        {isMobileBottomAccountTab ? (
+          <div className="trade-mobile-account-actions">
+            <button className="trade-mobile-account-deposit" type="button">
+              Deposit
+            </button>
+            <div className="trade-mobile-account-shortcuts">
+              <button className="trade-mobile-account-shortcut" type="button">
+                <span>Pers</span>
+                <span className="trade-mobile-account-switch-icon" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M12 8.4H14.25V3L21 9.75L14.25 16.5V12H9.3V7.05L3 13.8L9.3 21V15.6H11.55"
+                      stroke="white"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </span>
+                <span>Spot</span>
+              </button>
+              <button className="trade-mobile-account-shortcut" type="button">
+                Withdraw
+              </button>
+            </div>
+          </div>
+        ) : null}
+
+        <nav className="trade-mobile-bottom-nav" aria-label="Trade bottom navigation">
+          <button
+            className={`trade-mobile-bottom-item${isMobileBottomMarketsTab ? " is-active" : ""}`}
+            type="button"
+            onClick={() => setMobileBottomTab("markets")}
+          >
+            <span className="trade-mobile-bottom-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <rect x="3" y="13" width="4" height="8" rx="2" fill="currentColor" />
+                <rect x="10" y="9" width="4" height="12" rx="2" fill="currentColor" />
+                <rect x="17" y="4" width="4" height="17" rx="2" fill="currentColor" />
+              </svg>
+            </span>
+            <span>Markets</span>
+          </button>
+          <button
+            className={`trade-mobile-bottom-item${isMobileBottomTradeTab ? " is-active" : ""}`}
+            type="button"
+            onClick={() => setMobileBottomTab("trade")}
+          >
+            <span className="trade-mobile-bottom-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M4 16.5 9.5 11 13.5 15l6-6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" />
+                <path d="M17.2 9H19.5v2.3" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" />
+              </svg>
+            </span>
+            <span>Trade</span>
+          </button>
+          <button
+            className={`trade-mobile-bottom-item${isMobileBottomAccountTab ? " is-active" : ""}`}
+            type="button"
+            onClick={() => setMobileBottomTab("account")}
+          >
+            <span className="trade-mobile-bottom-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.8" />
+                <circle cx="12" cy="9.2" r="3.1" stroke="currentColor" strokeWidth="1.8" />
+                <path d="M6.7 18.4c.33-2.26 2.26-3.9 5.3-3.9s4.98 1.64 5.3 3.9" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+              </svg>
+            </span>
+            <span>Trade</span>
+          </button>
+        </nav>
+      </div>
+    );
+  }
 
   return (
     <div className="trade-screen" ref={screenRef} style={{ "--trade-scale": scale }}>
@@ -516,7 +1104,7 @@ function TradingPage() {
             </div>
           </section>
 
-          <section className="pro-chart-shell" ref={chartHostRef} />
+          <section className="pro-chart-shell" ref={desktopChartHostRef} />
 
           <section className={`order-book${isTradesBookTab ? " is-trades" : ""}`}>
             <div className="order-book-tabs">
@@ -803,222 +1391,36 @@ function TradingPage() {
           </section>
 
           <aside className={`order-panel${isSellSide || isLimitType ? " is-sell" : ""}`}>
-            <div className="mode-switch">
-              <button type="button">Cross</button>
-              <button type="button">1x</button>
-              <button type="button">One-Way</button>
-            </div>
-
-            <div className="side-tabs">
-              <button
-                className={isLimitType ? "" : "is-active"}
-                onClick={() => setOrderType("market")}
-                type="button"
-              >
-                Market
-              </button>
-              <button
-                className={isLimitType ? "is-active" : ""}
-                onClick={() => setOrderType("limit")}
-                type="button"
-              >
-                Limit
-              </button>
-            </div>
-
-            <div className="buy-sell">
-              <button
-                className={isSellSide ? "" : "is-active is-buy-active"}
-                onClick={() => setOrderSide("buy")}
-                type="button"
-              >
-                Buy/Long
-              </button>
-              <button
-                className={isSellSide ? "is-active is-sell-active" : ""}
-                onClick={() => setOrderSide("sell")}
-                type="button"
-              >
-                Sell/Short
-              </button>
-            </div>
-
-            <div className="flex items-center justify-between px-1">
-              <span className="text-[#999] text-base leading-6">Available</span>
-              <span className="text-white text-base leading-6">0.00 USDC</span>
-            </div>
-            <div className="flex items-center justify-between px-1">
-              <span className="text-[#999] text-base leading-6">Current Position</span>
-              <span className="text-white text-base leading-6">0.0000 BTC</span>
-            </div>
-
-            {isLimitType ? (
-              <div className="price-input">
-                <span className="price-left">
-                  <span className="price-label">Price</span>
-                  <span className="price-value">6789</span>
-                </span>
-                <span className="price-right">
-                  <span>USDC</span>
-                  <span className="price-mid">Mid</span>
-                </span>
-              </div>
-            ) : null}
-
-            <div className="qty-input">
-              <label className="qty-left">
-                <span className="qty-label">Quantity</span>
-                <input
-                  className="qty-field"
-                  type="number"
-                  min="0"
-                  step="1"
-                  value={quantityInput}
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    if (v === "" || /^\d*\.?\d*$/.test(v)) {
-                      setQuantityInput(v);
-                    }
-                  }}
-                  placeholder="0"
-                  aria-label="Order quantity"
-                />
-              </label>
-              <span className="qty-unit">
-                USDC
-                <span className="qty-unit-caret" aria-hidden="true">
-                  <img src={caretIcon} alt="" />
-                </span>
-              </span>
-            </div>
-            <p className="margin-note">Required Margin N/A</p>
-
-            <div className="leverage-row">
-              <div
-                className="leverage-track"
-                ref={leverageTrackRef}
-                onMouseDown={handleTrackMouseDown}
-              >
-                <div
-                  className="leverage-progress"
-                  style={{ width: `${leverage}%` }}
-                />
-                <span
-                  className="lever-dot"
-                  style={{ left: `${leverage}%`, transform: "translateX(-50%)" }}
-                  onMouseDown={handleTrackMouseDown}
-                  role="slider"
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                  aria-valuenow={leverage}
-                />
-              </div>
-              <div className="leverage-box">
-                <input
-                  className="leverage-input"
-                  type="number"
-                  min={0}
-                  max={100}
-                  value={leverageInput}
-                  onChange={handleLeverageInput}
-                  onBlur={handleLeverageBlur}
-                  aria-label="Leverage percent"
-                />
-                <span>%</span>
-              </div>
-            </div>
-
-            <div className={`reduce-row${isLimitType ? " has-tif" : ""}`}>
-              <label
-                className="reduce-only"
-                onClick={() => setReduceOnly((v) => !v)}
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === " " || e.key === "Enter") {
-                    e.preventDefault();
-                    setReduceOnly((v) => !v);
-                  }
-                }}
-                role="checkbox"
-                aria-checked={reduceOnly}
-              >
-                <span className={`reduce-dot${reduceOnly ? "" : " reduce-off"}`} />
-                <span>Reduce Only</span>
-              </label>
-              {isLimitType ? (
-                <div className="tif-switch">
-                  <span className="tif-label">TIF</span>
-                  <span className="tif-value">USDC</span>
-                  <span className="tif-caret" aria-hidden="true">
-                    <img src={caretIcon} alt="" />
-                  </span>
-                </div>
-              ) : null}
-            </div>
-
-            <button className={`primary-btn${isSellSide ? " is-sell" : ""}`} type="button">
-              Enable Trading
-            </button>
-
-            <span className="panel-divider" aria-hidden="true" />
-
-            <div className="flex items-center justify-between px-1">
-              <span className="text-[#999] text-base leading-6">Order Value</span>
-              <span className="text-white text-base leading-6">N/A</span>
-            </div>
-            <div className="flex items-center justify-between px-1">
-              <span className="text-[#999] text-base leading-6">Slippage</span>
-              <span className="value-teal text-base leading-6">Est: N / A / Max: 8.00%</span>
-            </div>
-            <div className="flex items-center justify-between px-1">
-              <span className="text-[#999] text-base leading-6">Fee</span>
-              <span className="value-teal inline-icon text-base leading-6">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <rect width="20" height="20" rx="2" fill="white" fillOpacity="0.1" />
-                  <path
-                    d="M14.2426 14.2426C13.1569 15.3284 11.6569 16 10 16C6.6863 16 4 13.3137 4 10C4 6.6863 6.6863 4 10 4C11.6569 4 13.1569 4.67157 14.2426 5.75737C14.7953 6.31003 16 7.66667 16 7.66667"
-                    stroke="white"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path d="M16 4.66675V7.66675H13" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                0.0450%/0.0150%
-              </span>
-            </div>
-
-            <button className="primary-btn" type="button">
-              Deposit
-            </button>
-
-            <div className="dual-switch">
-              <button type="button">
-                <span className="inline-icon">
-                  <span>Pers</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M12 8.4H14.25V3L21 9.75L14.25 16.5V12H9.3V7.05L3 13.8L9.3 21V15.6H11.55"
-                      stroke="white"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  <span>Spot</span>
-                </span>
-              </button>
-              <button type="button">Withdraw</button>
-            </div>
-
-            <span className="panel-divider" aria-hidden="true" />
-
-            <p className="summary-title">Account Equity</p>
-            {summaryRows.map((item) => (
-              <div key={item.label} className="summary-row flex items-center justify-between px-1">
-                <span className="text-[#999] text-base leading-6">{item.label}</span>
-                <span className={`${item.highlight ? "value-teal" : "text-white"} text-base leading-6`}>{item.value}</span>
-              </div>
-            ))}
+            <TradeOrderFormContent
+              isLimitType={isLimitType}
+              isSellSide={isSellSide}
+              reduceOnly={reduceOnly}
+              quantityInput={quantityInput}
+              leverage={leverage}
+              leverageInput={leverageInput}
+              quantityUnit={quantityUnit}
+              tifUnit={tifUnit}
+              quantityUnitOptions={quantityUnitOptions}
+              tifUnitOptions={tifUnitOptions}
+              isQuantityUnitMenuOpen={isQuantityUnitMenuOpen}
+              isTifMenuOpen={isTifMenuOpen}
+              leverageTrackRef={leverageTrackRef}
+              quantityUnitWrapRef={quantityUnitWrapRef}
+              tifUnitWrapRef={tifUnitWrapRef}
+              onOrderTypeChange={handleOrderTypeChange}
+              onOrderSideChange={handleOrderSideChange}
+              onQuantityChange={handleQuantityChange}
+              onQuantityUnitToggle={handleQuantityUnitToggle}
+              onQuantityUnitSelect={handleQuantityUnitSelect}
+              onLeverageTrackPointerDown={handleTrackPointerDown}
+              onLeverageInputChange={handleLeverageInput}
+              onLeverageBlur={handleLeverageBlur}
+              onReduceOnlyToggle={handleReduceOnlyToggle}
+              onTifUnitToggle={handleTifUnitToggle}
+              onTifUnitSelect={handleTifUnitSelect}
+              showAccountActions
+              summaryRows={summaryRows}
+            />
           </aside>
 
         </div>

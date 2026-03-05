@@ -52,8 +52,8 @@ function CopyTradePage() {
   const isStrategyTab = activeTab === "strategy";
 
   return (
-    <TradeRouteFrame height={980}>
-      <div className="route-page-shell">
+    <TradeRouteFrame height={980} className="copytrade-route-frame">
+      <div className="route-page-shell copytrade-page-shell">
         <div>
           <h1 className="route-page-title">Copy Trade</h1>
           <p className="route-page-subtitle">

@@ -34,6 +34,16 @@ const balanceRows = [
     transfer: "To Perp",
     contract: "",
   },
+  {
+    coin: "USDC(Perps)",
+    total: "16.014527 USDC",
+    available: "16.014527 USDC",
+    value: "$16.01",
+    pnl: "+$0.00(+0.00%)",
+    send: "Connect",
+    transfer: "To Perp",
+    contract: "",
+  },
 ];
 
 const portfolioTableData = {
@@ -135,8 +145,8 @@ function PortfolioPage() {
   const currentTable = portfolioTableData[activeTableTab];
 
   return (
-    <TradeRouteFrame height={1140}>
-      <div className="route-page-shell">
+    <TradeRouteFrame height={1140} className="portfolio-route-frame">
+      <div className="route-page-shell portfolio-page-shell">
         <div className="route-page-heading">
           <div>
             <h1 className="route-page-title">Protfolio</h1>
@@ -238,7 +248,12 @@ function PortfolioPage() {
                 currentTable.rows.map((row, rowIndex) => (
                   <div key={`${activeTableTab}-${rowIndex}`} className="portfolio-table-row">
                     {row.map((cell, cellIndex) => (
-                      <span key={`${activeTableTab}-${rowIndex}-${cellIndex}`} className={cell.className ?? ""}>
+                      <span
+                        key={`${activeTableTab}-${rowIndex}-${cellIndex}`}
+                        className={cell.className ?? ""}
+                        data-label={currentTable.headers[cellIndex]}
+                        data-hide-mobile={activeTableTab === "Balance" && currentTable.headers[cellIndex] === "Contract"}
+                      >
                         {cell.value}
                       </span>
                     ))}
@@ -247,6 +262,11 @@ function PortfolioPage() {
               ) : (
                 <div className="portfolio-table-empty">No records</div>
               )}
+            </div>
+
+            <div className="portfolio-page-pagination page-pagination" aria-label="Portfolio pages">
+              <span>1</span>
+              <span>/20page</span>
             </div>
           </div>
         </section>

@@ -22,13 +22,40 @@
 }
 
 .otx-header--trade {
+  --otx-header-divider-color: rgba(255, 255, 255, 0.16);
   background: #17201f;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid var(--otx-header-divider-color);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.32);
   height: 80px;
-  left: 50%;
-  transform: translateX(-50%) scale(var(--trade-scale, 1));
-  transform-origin: top center;
-  width: 1920px;
+  left: 0;
+  padding-inline: clamp(16px, 1.25vw, 24px);
+  transform: none;
+  width: 100%;
+}
+
+.otx-header--trade .otx-header-left {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.otx-header--trade .otx-nav {
+  flex: 1 1 auto;
+  gap: clamp(18px, 1.7vw, 40px);
+  min-width: 0;
+}
+
+.otx-header--trade .otx-nav-item {
+  flex: 0 0 auto;
+  gap: 0;
+  white-space: nowrap;
+}
+
+.otx-header--trade .otx-header-right {
+  flex: 0 0 auto;
+}
+
+.otx-header--trade .otx-nav-icon {
+  display: none;
 }
 
 .otx-header-left {
@@ -52,6 +79,7 @@
 
 .otx-nav {
   align-items: center;
+  --otx-nav-highlight-gradient: linear-gradient(90deg, var(--otx-theme-color-weak) 0%, var(--otx-theme-color) 100%);
   display: flex;
   gap: 40px;
 }
@@ -72,7 +100,11 @@
 }
 
 .otx-nav-item.is-active {
-  color: #07d4aa;
+  color: var(--otx-theme-color);
+}
+
+.otx-nav-label {
+  color: currentColor;
 }
 
 .otx-nav-icon {
@@ -80,12 +112,32 @@
   display: inline-flex;
   height: 24px;
   justify-content: center;
+  position: relative;
   width: 24px;
+}
+
+.otx-nav-icon::before {
+  background: currentColor;
+  content: "";
+  inset: 0;
+  mask-image: var(--otx-nav-icon-mask);
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: 24px 24px;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  transition: opacity 160ms ease;
+  -webkit-mask-image: var(--otx-nav-icon-mask);
+  -webkit-mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: 24px 24px;
 }
 
 .otx-nav-icon img {
   display: block;
   height: 24px;
+  transition: opacity 160ms ease;
   width: 24px;
 }
 
@@ -94,13 +146,22 @@
 }
 
 .otx-nav-item:hover {
-  color: #07d4aa;
+  color: var(--otx-theme-color);
+}
+
+.otx-nav-item:hover .otx-nav-label,
+.otx-nav-item.is-active .otx-nav-label {
+  color: currentColor;
+}
+
+.otx-nav-item:hover .otx-nav-icon::before,
+.otx-nav-item.is-active .otx-nav-icon::before {
+  opacity: 1;
 }
 
 .otx-nav-item:hover .otx-nav-icon img,
 .otx-nav-item.is-active .otx-nav-icon img {
-  filter: brightness(0) saturate(100%) invert(53%) sepia(84%) saturate(474%) hue-rotate(131deg)
-    brightness(95%) contrast(91%);
+  opacity: 0;
 }
 
 .otx-header-right {
@@ -109,13 +170,58 @@
   gap: 16px;
 }
 
+.otx-theme-toggle {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(var(--otx-theme-color-rgb), 0.38);
+  border-radius: 999px;
+  color: var(--otx-theme-color);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 700;
+  gap: 8px;
+  height: 40px;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  padding: 0 14px 0 10px;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+
+.otx-theme-toggle:hover {
+  background: rgba(var(--otx-theme-color-rgb), 0.12);
+  border-color: rgba(var(--otx-theme-color-rgb), 0.64);
+}
+
+.otx-theme-toggle:focus-visible {
+  box-shadow: 0 0 0 2px rgba(var(--otx-theme-color-rgb), 0.35);
+  outline: none;
+}
+
+.otx-theme-toggle-dot {
+  background: linear-gradient(135deg, var(--otx-theme-color-weak) 0%, var(--otx-theme-color) 100%);
+  border-radius: 999px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
+  display: inline-block;
+  flex: 0 0 auto;
+  height: 14px;
+  width: 14px;
+}
+
+.otx-theme-toggle-label {
+  line-height: 1;
+  min-width: 34px;
+  text-align: left;
+  white-space: nowrap;
+}
+
 .otx-wallet-menu-wrap {
   position: relative;
 }
 
 .otx-wallet-btn {
   align-items: center;
-  background: #07d4aa;
+  background: var(--otx-theme-color);
   border: 0;
   border-radius: 8px;
   color: #fff;
@@ -134,12 +240,14 @@
   color: #17201f;
 }
 
-.otx-wallet-btn:hover {
-  background: #11e8bc;
+.otx-wallet-btn:hover:not(.is-connected) {
+  background:
+    linear-gradient(0deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.08)),
+    var(--otx-theme-color);
 }
 
 .otx-wallet-btn:focus-visible {
-  box-shadow: 0 0 0 2px rgba(7, 212, 170, 0.35);
+  box-shadow: 0 0 0 2px rgba(var(--otx-theme-color-rgb), 0.35);
   outline: none;
 }
 
@@ -159,8 +267,8 @@
 
 .otx-wallet-user-avatar {
   align-items: center;
-  background: radial-gradient(circle at 34% 34%, rgba(7, 212, 170, 0.34) 0%, rgba(7, 212, 170, 0.1) 64%, rgba(7, 212, 170, 0.04) 100%);
-  border: 2px solid rgba(7, 212, 170, 0.5);
+  background: radial-gradient(circle at 34% 34%, rgba(var(--otx-theme-color-rgb), 0.34) 0%, rgba(var(--otx-theme-color-rgb), 0.1) 64%, rgba(var(--otx-theme-color-rgb), 0.04) 100%);
+  border: 2px solid rgba(var(--otx-theme-color-rgb), 0.5);
   border-radius: 999px;
   color: #d9fff6;
   display: inline-flex;
@@ -245,13 +353,13 @@
 
 .otx-wallet-dropdown-item:hover,
 .otx-wallet-dropdown-item:focus-visible {
-  background: linear-gradient(90deg, rgba(7, 212, 170, 0.2) 0%, rgba(7, 212, 170, 0.06) 100%);
+  background: linear-gradient(90deg, rgba(var(--otx-theme-color-rgb), 0.2) 0%, rgba(var(--otx-theme-color-rgb), 0.06) 100%);
   color: #f8fcff;
   outline: none;
 }
 
 .otx-wallet-dropdown-item:active {
-  background: linear-gradient(90deg, rgba(7, 212, 170, 0.28) 0%, rgba(7, 212, 170, 0.12) 100%);
+  background: linear-gradient(90deg, rgba(var(--otx-theme-color-rgb), 0.28) 0%, rgba(var(--otx-theme-color-rgb), 0.12) 100%);
 }
 
 .otx-wallet-dropdown-icon {
@@ -287,7 +395,7 @@
   background: rgba(255, 255, 255, 0.1);
   border: 0;
   border-radius: 8px;
-  color: #07d4aa;
+  color: var(--otx-theme-color);
   display: inline-flex;
   height: 40px;
   justify-content: center;
@@ -311,7 +419,8 @@
 @media (max-width: 768px) {
   .otx-header--trade {
     background: linear-gradient(90deg, #0f1617 0%, #161d1d 100%);
-    border-bottom: 0;
+    border-bottom: 1px solid var(--otx-header-divider-color);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
     height: 48px;
     left: 0;
     padding: 9px 12px 9px 17px;
@@ -340,6 +449,39 @@
   .otx-header-right {
     gap: 8px;
     margin-left: auto;
+  }
+
+  .otx-theme-toggle {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-radius: 4px;
+    color: var(--otx-theme-color);
+    display: inline-flex;
+    height: 30px;
+    justify-content: center;
+    order: 1;
+    padding: 0;
+    width: 30px;
+  }
+
+  .otx-theme-toggle:hover {
+    background: transparent;
+    border-color: transparent;
+  }
+
+  .otx-theme-toggle:focus-visible {
+    box-shadow: 0 0 0 2px rgba(var(--otx-theme-color-rgb), 0.35);
+  }
+
+  .otx-theme-toggle-dot {
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.24);
+    height: 14px;
+    width: 14px;
+  }
+
+  .otx-theme-toggle-label {
+    display: none;
   }
 
   .otx-icon-btn {
@@ -442,6 +584,7 @@
   .otx-mobile-menu-overlay {
     background: rgba(0, 0, 0, 0.56);
     inset: 48px 0 0;
+    z-index: 10020;
   }
 
   .otx-mobile-menu-panel {
@@ -453,6 +596,7 @@
     overflow-y: auto;
     padding: 12px 12px 0;
     width: 100%;
+    z-index: 10021;
   }
 
   .otx-mobile-menu-handle {
@@ -489,22 +633,22 @@
 
   .otx-mobile-menu-item:hover,
   .otx-mobile-menu-item:focus-visible {
-    background: linear-gradient(90deg, rgba(7, 212, 170, 0.18) 0%, rgba(7, 212, 170, 0.06) 68%, rgba(7, 212, 170, 0) 100%);
-    box-shadow: inset 3px 0 0 rgba(7, 212, 170, 0.9);
-    color: #07d4aa;
+    background: linear-gradient(90deg, rgba(var(--otx-theme-color-rgb), 0.18) 0%, rgba(var(--otx-theme-color-rgb), 0.06) 68%, rgba(var(--otx-theme-color-rgb), 0) 100%);
+    box-shadow: inset 3px 0 0 rgba(var(--otx-theme-color-rgb), 0.9);
+    color: var(--otx-theme-color);
     outline: none;
   }
 
   .otx-mobile-menu-item:active {
-    background: linear-gradient(90deg, rgba(7, 212, 170, 0.24) 0%, rgba(7, 212, 170, 0.08) 68%, rgba(7, 212, 170, 0) 100%);
-    box-shadow: inset 3px 0 0 rgba(7, 212, 170, 1);
-    color: #07d4aa;
+    background: linear-gradient(90deg, rgba(var(--otx-theme-color-rgb), 0.24) 0%, rgba(var(--otx-theme-color-rgb), 0.08) 68%, rgba(var(--otx-theme-color-rgb), 0) 100%);
+    box-shadow: inset 3px 0 0 rgba(var(--otx-theme-color-rgb), 1);
+    color: var(--otx-theme-color);
   }
 
   .otx-mobile-menu-item.is-active {
-    background: linear-gradient(90deg, rgba(7, 212, 170, 0.16) 0%, rgba(7, 212, 170, 0.05) 68%, rgba(7, 212, 170, 0) 100%);
-    box-shadow: inset 3px 0 0 rgba(7, 212, 170, 0.92);
-    color: #07d4aa;
+    background: linear-gradient(90deg, rgba(var(--otx-theme-color-rgb), 0.16) 0%, rgba(var(--otx-theme-color-rgb), 0.05) 68%, rgba(var(--otx-theme-color-rgb), 0) 100%);
+    box-shadow: inset 3px 0 0 rgba(var(--otx-theme-color-rgb), 0.92);
+    color: var(--otx-theme-color);
   }
 
   .otx-mobile-wallet-panel {
@@ -555,15 +699,15 @@
 
   .otx-wallet-dropdown--mobile .otx-wallet-dropdown-item:hover,
   .otx-wallet-dropdown--mobile .otx-wallet-dropdown-item:focus-visible {
-    background: linear-gradient(90deg, rgba(7, 212, 170, 0.18) 0%, rgba(7, 212, 170, 0.06) 68%, rgba(7, 212, 170, 0) 100%);
-    box-shadow: inset 3px 0 0 rgba(7, 212, 170, 0.9);
-    color: #07d4aa;
+    background: linear-gradient(90deg, rgba(var(--otx-theme-color-rgb), 0.18) 0%, rgba(var(--otx-theme-color-rgb), 0.06) 68%, rgba(var(--otx-theme-color-rgb), 0) 100%);
+    box-shadow: inset 3px 0 0 rgba(var(--otx-theme-color-rgb), 0.9);
+    color: var(--otx-theme-color);
     outline: none;
   }
 
   .otx-wallet-dropdown--mobile .otx-wallet-dropdown-item:active {
-    background: linear-gradient(90deg, rgba(7, 212, 170, 0.24) 0%, rgba(7, 212, 170, 0.08) 68%, rgba(7, 212, 170, 0) 100%);
-    box-shadow: inset 3px 0 0 rgba(7, 212, 170, 1);
-    color: #07d4aa;
+    background: linear-gradient(90deg, rgba(var(--otx-theme-color-rgb), 0.24) 0%, rgba(var(--otx-theme-color-rgb), 0.08) 68%, rgba(var(--otx-theme-color-rgb), 0) 100%);
+    box-shadow: inset 3px 0 0 rgba(var(--otx-theme-color-rgb), 1);
+    color: var(--otx-theme-color);
   }
 }

@@ -3,11 +3,15 @@
 }
 
 .app-layout-content {
-  padding-bottom: 0;
+  padding-bottom: 60px;
 }
 
 @media (max-width: 768px) {
   .app-layout--mobile-no-footer .trade-footer-shell {
     display: none;
+  }
+
+  .app-layout--mobile-no-footer .app-layout-content {
+    padding-bottom: 0;
   }
 }

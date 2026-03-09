@@ -7,21 +7,10 @@ const FOOTER_HEIGHT = 60;
 
 const getViewportScale = () => {
   const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
-  return viewportWidth / CANVAS_WIDTH;
+  return Math.min(viewportWidth / CANVAS_WIDTH, 1);
 };
 
-const getInitialScale = () => {
-  if (typeof window === "undefined") {
-    return 1;
-  }
-
-  const cssScale = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--trade-scale"));
-  if (Number.isFinite(cssScale) && cssScale > 0) {
-    return cssScale;
-  }
-
-  return getViewportScale();
-};
+const getInitialScale = () => (typeof window === "undefined" ? 1 : getViewportScale());
 
 const measureCanvasHeight = (canvas) => {
   if (!canvas) {
@@ -94,10 +83,6 @@ function TradeRouteFrame({ height, minHeight, children, className = "" }) {
     };
   }, [syncContentHeight]);
 
-  useLayoutEffect(() => {
-    document.documentElement.style.setProperty("--trade-scale", String(scale));
-  }, [scale]);
-
   const stageStyle = {
     height: contentHeight * scale,
     width: CANVAS_WIDTH * scale,
@@ -110,7 +95,7 @@ function TradeRouteFrame({ height, minHeight, children, className = "" }) {
           className="trade-route-canvas"
           ref={canvasRef}
           style={{
-            minHeight: `max(${baseMinHeight}px, calc((100vh / var(--trade-scale, 1)) - ${FOOTER_HEIGHT}px))`,
+            minHeight: `max(${baseMinHeight}px, calc((100vh - ${FOOTER_HEIGHT}px) / var(--trade-scale, 1)))`,
           }}
         >
           {children}

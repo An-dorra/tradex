@@ -1,7 +1,7 @@
 .trade-route-screen {
-  background: #0b1012;
+  background: var(--otx-page-bg);
   box-sizing: border-box;
-  min-height: calc(100vh - (60px * var(--trade-scale, 1)));
+  min-height: calc(100vh - 60px);
   overflow-x: hidden;
   overflow-y: visible;
 }
@@ -21,6 +21,7 @@
   transform: scale(var(--trade-scale, 1));
   transform-origin: top left;
   width: 1920px;
+  padding-bottom: 30px;
 }
 
 .trade-route-canvas::before {
@@ -32,6 +33,21 @@
   right: -10px;
   top: 80px;
   width: 760px;
+}
+
+:root[data-theme-accent="blue"] .trade-route-canvas {
+  background: #2d3760;
+}
+
+@media (min-width: 1921px) {
+  .trade-route-stage {
+    width: 100% !important;
+  }
+
+  .trade-route-canvas {
+    width: 100% !important;
+    transform: none !important;
+  }
 }
 
 @media (max-width: 768px) {

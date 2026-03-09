@@ -3,12 +3,23 @@
 @tailwind utilities;
 
 :root {
+  --otx-theme-color: #07d4aa;
+  --otx-theme-color-rgb: 7, 212, 170;
+  --otx-theme-color-weak: #6ff6dc;
+  --otx-page-bg: #0b1012;
   font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   line-height: 1.5;
   font-weight: 400;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+:root[data-theme-accent="blue"] {
+  --otx-theme-color: #5d9dff;
+  --otx-theme-color-rgb: 93, 157, 255;
+  --otx-theme-color-weak: #9bc4ff;
+  --otx-page-bg: #2d3760;
 }
 
 html,
@@ -35,7 +46,7 @@ body,
 
 body {
   margin: 0;
-  background: #0b1012;
+  background: var(--otx-page-bg);
   overflow-x: hidden;
   overflow-y: auto;
 }

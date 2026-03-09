@@ -79,7 +79,7 @@ function CopyTradeWizardDialog({ open, onClose }) {
                   <span className="ct-wizard-account-value is-green">Available</span>
                 </div>
                 <div className="ct-wizard-account-row">
-                  <span className="ct-wizard-account-label">Active Status</span>
+                  <span className="ct-wizard-account-label">Signal Strategy</span>
                   <span className="ct-wizard-account-value is-blue">Active</span>
                 </div>
               </div>
@@ -96,6 +96,9 @@ function CopyTradeWizardDialog({ open, onClose }) {
       </div>
 
       <footer className="ct-wizard-footer">
+        <button className="ct-wizard-back" type="button" onClick={onClose}>
+          Back
+        </button>
         <button className="ct-wizard-next" type="button" disabled>
           Next
         </button>

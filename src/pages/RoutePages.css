@@ -5,6 +5,12 @@
   width: 1320px;
 }
 
+@media (min-width: 1921px) {
+  .route-page-shell {
+    width: min(1760px, calc(100% - 32px));
+  }
+}
+
 .route-page-heading {
   display: flex;
   justify-content: space-between;
@@ -48,7 +54,7 @@
 }
 
 .route-btn.is-primary {
-  background: #07d4aa;
+  background: var(--otx-theme-color);
   color: #273035;
 }
 
@@ -70,7 +76,7 @@
 
 .route-chip.is-running,
 .route-chip.is-available {
-  background: rgba(7, 212, 170, 0.3);
+  background: rgba(var(--otx-theme-color-rgb), 0.3);
   color: #43ff9b;
 }
 
@@ -104,7 +110,7 @@
 }
 
 .route-value.is-teal {
-  color: #07d4aa;
+  color: var(--otx-theme-color);
 }
 
 .route-value.is-green {
@@ -168,7 +174,7 @@
 }
 
 .portfolio-invite-amount {
-  color: #07d4aa;
+  color: var(--otx-theme-color);
   font-size: 22px;
   font-weight: 700;
   line-height: 32px;
@@ -275,19 +281,29 @@
 
 .portfolio-chart-tab {
   align-items: center;
+  background: transparent;
+  border: 0;
   color: #999;
+  cursor: pointer;
   display: inline-flex;
+  font-family: inherit;
   font-size: 18px;
   font-weight: 400;
   height: 60px;
   justify-content: center;
   line-height: 28px;
   min-width: 130px;
+  padding: 0;
 }
 
 .portfolio-chart-tab.is-active {
-  color: #07d4aa;
+  color: var(--otx-theme-color);
   font-weight: 700;
+}
+
+.portfolio-chart-tab:focus-visible {
+  outline: 1px solid rgba(var(--otx-theme-color-rgb), 0.6);
+  outline-offset: -1px;
 }
 
 .portfolio-chart-area {
@@ -391,12 +407,12 @@
 }
 
 .portfolio-table-tab:focus-visible {
-  outline: 1px solid rgba(7, 212, 170, 0.6);
+  outline: 1px solid rgba(var(--otx-theme-color-rgb), 0.6);
   outline-offset: -1px;
 }
 
 .portfolio-table-tab.is-active {
-  color: #07d4aa;
+  color: var(--otx-theme-color);
   font-weight: 700;
 }
 
@@ -445,7 +461,7 @@
 }
 
 .portfolio-table-row .is-teal {
-  color: #07d4aa;
+  color: var(--otx-theme-color);
 }
 
 .portfolio-table-empty {
@@ -494,7 +510,7 @@
 }
 
 .copytrade-tab.is-active {
-  color: #07d4aa;
+  color: var(--otx-theme-color);
   font-weight: 700;
 }
 
@@ -525,7 +541,7 @@
 
 .copytrade-add {
   align-items: center;
-  background: #07d4aa;
+  background: var(--otx-theme-color);
   border-radius: 8px;
   color: #273035;
   cursor: pointer;
@@ -553,7 +569,7 @@
 }
 
 .copytrade-card.is-account {
-  padding-top: 16px;
+  padding-top: 24px;
 }
 
 .copytrade-card-header {
@@ -643,7 +659,7 @@
 }
 
 .copytrade-card-details.is-account-details {
-  margin-top: 8px;
+  margin-top: 12px;
 }
 
 .copytrade-status-label {
@@ -726,7 +742,7 @@
 }
 
 .referral-highlight {
-  color: #07d4aa;
+  color: var(--otx-theme-color);
 }
 
 .referral-inline-action {
@@ -753,7 +769,7 @@
 
 .referral-invite-btn {
   align-items: center;
-  background: #07d4aa;
+  background: var(--otx-theme-color);
   border-radius: 8px;
   color: #273035;
   cursor: pointer;
@@ -1119,7 +1135,7 @@
   align-items: center;
   background: transparent;
   border: 0;
-  color: #07d4aa;
+  color: var(--otx-theme-color);
   cursor: pointer;
   display: inline-flex;
   font-size: 14px;
@@ -1135,7 +1151,7 @@
 
 .api-connect-btn {
   align-items: center;
-  background: #07d4aa;
+  background: var(--otx-theme-color);
   border-radius: 8px;
   color: #273035;
   cursor: pointer;
@@ -1373,7 +1389,7 @@
 }
 
 .signals-select.is-open {
-  border-color: #07d4aa;
+  border-color: var(--otx-theme-color);
   color: rgba(255, 255, 255, 0.7);
   z-index: 2;
 }
@@ -1455,7 +1471,7 @@
 }
 
 .signals-btn.is-primary {
-  background: #07d4aa;
+  background: var(--otx-theme-color);
   color: #273035;
 }
 
@@ -1597,7 +1613,7 @@
   }
 
   .copytrade-page-shell .route-page-title::before {
-    background: #07d4aa;
+    background: var(--otx-theme-color);
     border-radius: 0 50px 50px 0;
     content: "";
     height: 20px;
@@ -1649,12 +1665,12 @@
   }
 
   .copytrade-page-shell .copytrade-tab.is-active {
-    color: #07d4aa;
+    color: var(--otx-theme-color);
     font-weight: 700;
   }
 
   .copytrade-page-shell .copytrade-tab.is-active::after {
-    background: #07d4aa;
+    background: var(--otx-theme-color);
     border-radius: 20px;
     bottom: 0;
     content: "";
@@ -1758,7 +1774,7 @@
   }
 
   .copytrade-page-shell .copytrade-action:first-child {
-    background: #07d4aa;
+    background: var(--otx-theme-color);
     color: #273035;
     order: 2;
   }
@@ -1799,7 +1815,7 @@
   }
 
   .portfolio-page-shell .route-page-title::before {
-    background: #07d4aa;
+    background: var(--otx-theme-color);
     border-radius: 0 50px 50px 0;
     content: "";
     height: 20px;
@@ -1841,7 +1857,7 @@
   }
 
   .portfolio-page-shell .portfolio-invite-card::after {
-    background: linear-gradient(180deg, rgba(7, 212, 170, 0) 0%, rgba(7, 212, 170, 0.12) 100%);
+    background: linear-gradient(180deg, rgba(var(--otx-theme-color-rgb), 0) 0%, rgba(var(--otx-theme-color-rgb), 0.12) 100%);
     bottom: 0;
     content: "";
     height: 143px;
@@ -1962,12 +1978,12 @@
   }
 
   .portfolio-page-shell .portfolio-table-tab.is-active {
-    color: #07d4aa;
+    color: var(--otx-theme-color);
     font-weight: 700;
   }
 
   .portfolio-page-shell .portfolio-table-tab.is-active::after {
-    background: #07d4aa;
+    background: var(--otx-theme-color);
     border-radius: 20px;
     bottom: 0;
     content: "";
@@ -2026,11 +2042,11 @@
   }
 
   .portfolio-page-shell .portfolio-table-row span.is-green {
-    color: #07d4aa;
+    color: var(--otx-theme-color);
   }
 
   .portfolio-page-shell .portfolio-table-row span.is-teal {
-    color: #07d4aa;
+    color: var(--otx-theme-color);
   }
 
   .portfolio-page-shell .portfolio-table-empty {
@@ -2089,7 +2105,7 @@
   .referral-page-shell .route-page-title::before,
   .api-page-shell .route-page-title::before,
   .signals-page-shell .route-page-title::before {
-    background: #07d4aa;
+    background: var(--otx-theme-color);
     border-radius: 0 50px 50px 0;
     content: "";
     height: 20px;
@@ -2131,7 +2147,7 @@
   }
 
   .referral-page-shell .referral-card:first-child::after {
-    background: linear-gradient(180deg, rgba(7, 212, 170, 0) 0%, rgba(7, 212, 170, 0.12) 100%);
+    background: linear-gradient(180deg, rgba(var(--otx-theme-color-rgb), 0) 0%, rgba(var(--otx-theme-color-rgb), 0.12) 100%);
     bottom: 0;
     content: "";
     height: 153px;
@@ -2383,7 +2399,7 @@
   }
 
   .api-page-shell .api-mobile-generate {
-    background: #07d4aa;
+    background: var(--otx-theme-color);
     color: #273035;
   }
 

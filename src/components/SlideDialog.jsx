@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import "./SlideDialog.css";
 
 const MOTION_DURATION_MS = 360;
 const VALID_DIRECTIONS = new Set(["top", "right", "bottom", "left", "center"]);
+const LOCK_COUNT_KEY = "__otxScrollLockCount";
+const LOCK_SNAPSHOT_KEY = "__otxScrollLockSnapshot";
 
 function joinClasses(...classNames) {
   return classNames.filter(Boolean).join(" ");
@@ -26,6 +28,7 @@ function SlideDialog({
 }) {
   const [shouldRender, setShouldRender] = useState(open);
   const [isVisible, setIsVisible] = useState(open);
+  const panelRef = useRef(null);
 
   const safeDirection = useMemo(() => {
     if (VALID_DIRECTIONS.has(direction)) {
@@ -39,6 +42,9 @@ function SlideDialog({
       setShouldRender(true);
       const frameId = window.requestAnimationFrame(() => {
         setIsVisible(true);
+        if (panelRef.current) {
+          panelRef.current.scrollTop = 0;
+        }
       });
       return () => {
         window.cancelAnimationFrame(frameId);
@@ -81,21 +87,46 @@ function SlideDialog({
 
     const html = document.documentElement;
     const body = document.body;
-    const prevHtmlOverflow = html.style.overflow;
-    const prevBodyOverflow = body.style.overflow;
-    const prevHtmlOverscroll = html.style.overscrollBehavior;
-    const prevBodyOverscroll = body.style.overscrollBehavior;
+    const activeCount = Number(window[LOCK_COUNT_KEY] ?? 0);
 
-    html.style.overflow = "hidden";
-    body.style.overflow = "hidden";
-    html.style.overscrollBehavior = "none";
-    body.style.overscrollBehavior = "none";
+    if (activeCount === 0) {
+      window[LOCK_SNAPSHOT_KEY] = {
+        htmlOverflow: html.style.overflow,
+        bodyOverflow: body.style.overflow,
+        htmlOverscroll: html.style.overscrollBehavior,
+        bodyOverscroll: body.style.overscrollBehavior,
+      };
+      html.style.overflow = "hidden";
+      body.style.overflow = "hidden";
+      html.style.overscrollBehavior = "none";
+      body.style.overscrollBehavior = "none";
+    }
+
+    window[LOCK_COUNT_KEY] = activeCount + 1;
 
     return () => {
-      html.style.overflow = prevHtmlOverflow;
-      body.style.overflow = prevBodyOverflow;
-      html.style.overscrollBehavior = prevHtmlOverscroll;
-      body.style.overscrollBehavior = prevBodyOverscroll;
+      const nextCount = Math.max(0, Number(window[LOCK_COUNT_KEY] ?? 1) - 1);
+      window[LOCK_COUNT_KEY] = nextCount;
+
+      if (nextCount > 0) {
+        return;
+      }
+
+      const snapshot = window[LOCK_SNAPSHOT_KEY];
+      if (snapshot) {
+        html.style.overflow = snapshot.htmlOverflow;
+        body.style.overflow = snapshot.bodyOverflow;
+        html.style.overscrollBehavior = snapshot.htmlOverscroll;
+        body.style.overscrollBehavior = snapshot.bodyOverscroll;
+      } else {
+        html.style.overflow = "";
+        body.style.overflow = "";
+        html.style.overscrollBehavior = "";
+        body.style.overscrollBehavior = "";
+      }
+
+      delete window[LOCK_COUNT_KEY];
+      delete window[LOCK_SNAPSHOT_KEY];
     };
   }, [open, lockScroll]);
 
@@ -122,6 +153,7 @@ function SlideDialog({
       onClick={onOverlayClick}
     >
       <section
+        ref={panelRef}
         className={joinClasses("slide-dialog-panel", `slide-dialog-panel--${safeDirection}`, panelClassName)}
         style={panelStyle}
         role="dialog"

@@ -1,61 +1,11 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import pairBtcIcon from "../assets/icons/pair-btc.png";
 import caretIcon from "../assets/icons/caret.svg";
 import useIsMobileViewport from "../hooks/useIsMobileViewport.js";
 import useClickOutside from "../hooks/useClickOutside.js";
 import TradeOrderFormContent from "../components/TradeOrderFormContent.jsx";
-import {
-  BTC_SYMBOL,
-  CHART_PERIODS,
-  DEFAULT_CHART_PERIOD,
-  createLocalBtcDatafeed,
-  loadKlineChartPro,
-} from "./tradingChartDatafeed.js";
+import { BTC_SYMBOL, CHART_PERIODS, createLocalBtcDatafeed, loadKlineChartPro } from "./tradingChartDatafeed.js";
 import "./TradingPage.css";
-
-const CANVAS_WIDTH = 1920;
-const CANVAS_HEIGHT = 1522;
-
-const getViewportScale = () => {
-  const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
-  return viewportWidth / CANVAS_WIDTH;
-};
-
-const getInitialScale = () => {
-  if (typeof window === "undefined") {
-    return 1;
-  }
-
-  const cssScale = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--trade-scale"));
-  if (Number.isFinite(cssScale) && cssScale > 0) {
-    return cssScale;
-  }
-
-  return getViewportScale();
-};
-
-const measureCanvasHeight = (canvas) => {
-  if (!canvas) {
-    return 0;
-  }
-
-  let nextHeight = canvas.scrollHeight;
-  for (const child of canvas.children) {
-    if (!(child instanceof HTMLElement)) {
-      continue;
-    }
-
-    const computed = window.getComputedStyle(child);
-    if (computed.display === "none") {
-      continue;
-    }
-
-    const marginBottom = Number.parseFloat(computed.marginBottom) || 0;
-    nextHeight = Math.max(nextHeight, child.offsetTop + child.offsetHeight + marginBottom);
-  }
-
-  return Math.ceil(nextHeight);
-};
 
 const marketStats = [
   { label: "Mark", value: "69291.0" },
@@ -101,6 +51,16 @@ const tradePrintRows = Array.from({ length: 24 }, (_, index) => ({
   side: index % 5 === 0 || index % 5 === 1 ? "sell" : "buy",
 }));
 
+const desktopChartPeriods = [
+  { id: "1m", label: "1m", multiplier: 1, timespan: "minute", text: "1m" },
+  { id: "5m", label: "5m", multiplier: 5, timespan: "minute", text: "5m" },
+  { id: "15m", label: "15m", multiplier: 15, timespan: "minute", text: "15m" },
+  { id: "30m", label: "30m", multiplier: 30, timespan: "minute", text: "30m" },
+  { id: "1h", label: "1h", multiplier: 1, timespan: "hour", text: "1h" },
+  { id: "4h", label: "4h", multiplier: 4, timespan: "hour", text: "4h" },
+  { id: "1d", label: "1d", multiplier: 1, timespan: "day", text: "1d" },
+];
+
 const mobileTradesRows = [
   { price: "32.223", size: "2.00", time: "23:59:55", side: "buy" },
   { price: "32.223", size: "2.00", time: "23:59:55", side: "buy" },
@@ -113,13 +73,13 @@ const mobileTradesRows = [
   { price: "32.223", size: "2.00", time: "23:59:55", side: "buy" },
 ];
 
-const orderBookBidRows = Array.from({ length: 11 }, () => ({
+const orderBookBidRows = Array.from({ length: 10 }, () => ({
   price: "34567",
   size: "0.0000",
   ratio: "0.0005%",
 }));
 
-const orderBookAskRows = Array.from({ length: 11 }, () => ({
+const orderBookAskRows = Array.from({ length: 10 }, () => ({
   price: "56789",
   size: "0.0000",
   ratio: "0.0005%",
@@ -281,7 +241,6 @@ const summaryRows = [...accountEquityRows, { label: "Perps Overview", value: "" 
 
 function TradingPage() {
   const screenRef = useRef(null);
-  const canvasRef = useRef(null);
   const desktopChartHostRef = useRef(null);
   const mobileChartHostRef = useRef(null);
   const leverageTrackRef = useRef(null);
@@ -289,8 +248,6 @@ function TradingPage() {
   const mobileOrderBookSymbolWrapRef = useRef(null);
   const quantityUnitWrapRef = useRef(null);
   const tifUnitWrapRef = useRef(null);
-  const [scale, setScale] = useState(getInitialScale);
-  const [contentHeight, setContentHeight] = useState(CANVAS_HEIGHT);
   const [leverage, setLeverage] = useState(80);
   const [leverageInput, setLeverageInput] = useState("80");
   const [reduceOnly, setReduceOnly] = useState(true);
@@ -362,11 +319,6 @@ function TradingPage() {
   const handleTifUnitSelect = useCallback((nextUnit) => {
     setTifUnit(nextUnit);
     setIsTifMenuOpen(false);
-  }, []);
-
-  const syncContentHeight = useCallback(() => {
-    const measuredHeight = Math.max(CANVAS_HEIGHT, measureCanvasHeight(canvasRef.current));
-    setContentHeight((prevHeight) => (prevHeight === measuredHeight ? prevHeight : measuredHeight));
   }, []);
 
   const clampPercent = (v) => Math.max(0, Math.min(100, Math.round(v)));
@@ -466,37 +418,6 @@ function TradingPage() {
     setIsTifMenuOpen(false);
   });
 
-  useLayoutEffect(() => {
-    const updateScale = () => {
-      if (isMobileViewport) {
-        setScale(1);
-        return;
-      }
-      setScale(getViewportScale());
-    };
-
-    updateScale();
-    window.addEventListener("resize", updateScale);
-
-    return () => {
-      window.removeEventListener("resize", updateScale);
-    };
-  }, [isMobileViewport]);
-
-  useLayoutEffect(() => {
-    if (isMobileViewport) {
-      return;
-    }
-    document.documentElement.style.setProperty("--trade-scale", String(scale));
-  }, [isMobileViewport, scale]);
-
-  useLayoutEffect(() => {
-    if (isMobileViewport) {
-      return;
-    }
-    syncContentHeight();
-  }, [isMobileViewport, syncContentHeight, scale, tableTab, bookTab, orderType]);
-
   useEffect(() => {
     if (isMobileViewport && (!isMobileBottomMarketsTab || !isMobileChartMainTab)) {
       return undefined;
@@ -526,8 +447,8 @@ function TradingPage() {
         locale: "en-US",
         timezone: "Etc/UTC",
         symbol: BTC_SYMBOL,
-        period: isMobileViewport ? CHART_PERIODS[1] : DEFAULT_CHART_PERIOD,
-        periods: CHART_PERIODS,
+        period: isMobileViewport ? CHART_PERIODS[1] : desktopChartPeriods[4],
+        periods: isMobileViewport ? CHART_PERIODS : desktopChartPeriods,
         mainIndicators: isMobileViewport ? [] : ["MA"],
         subIndicators: isMobileViewport ? [] : ["VOL"],
         datafeed,
@@ -546,16 +467,6 @@ function TradingPage() {
       host.innerHTML = "";
     };
   }, [isMobileChartMainTab, isMobileViewport, isMobileBottomMarketsTab]);
-
-  const stageStyle = {
-    width: CANVAS_WIDTH * scale,
-    height: contentHeight * scale,
-  };
-
-  const canvasStyle = {
-    "--trade-scale": scale,
-    minHeight: CANVAS_HEIGHT,
-  };
 
   if (isMobileViewport) {
     return (
@@ -1075,158 +986,158 @@ function TradingPage() {
   }
 
   return (
-    <div className="trade-screen" ref={screenRef} style={{ "--trade-scale": scale }}>
-      <div className="trade-stage" style={stageStyle}>
-        <div className="trade-canvas" ref={canvasRef} style={canvasStyle}>
-          <section className="market-strip">
-            <div className="pair-block">
-              <div className="pair-icon">
-                <img src={pairBtcIcon} alt="" />
+    <div className="trade-screen" ref={screenRef}>
+      <div className="trade-canvas">
+        <section className="market-strip">
+          <div className="pair-block">
+            <div className="pair-icon">
+              <img src={pairBtcIcon} alt="" />
+            </div>
+            <div className="pair-content">
+              <div className="pair-main">
+                <span>BTC-USDC</span>
+                <span className="pair-caret">
+                  <img src={caretIcon} alt="" />
+                </span>
               </div>
-              <div className="pair-content">
-                <div className="pair-main">
-                  <span>BTC-USDC</span>
-                  <span className="pair-caret">
+              <p className="pair-leverage">40x</p>
+            </div>
+          </div>
+
+          <div className="stats-grid">
+            {marketStats.map((item) => (
+              <div key={item.label} className="stat-item">
+                <p className="stat-label">{item.label}</p>
+                <p className={`stat-value${item.green ? " is-green" : ""}`}>{item.value}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="trade-chart-region">
+          <section className="pro-chart-shell" ref={desktopChartHostRef} />
+        </section>
+
+        <section className={`order-book${isTradesBookTab ? " is-trades" : ""}`}>
+          <div className="order-book-tabs">
+            <button
+              className={isTradesBookTab ? "" : "is-active"}
+              onClick={() => setBookTab("orderBook")}
+              type="button"
+            >
+              Order Book
+            </button>
+            <button
+              className={isTradesBookTab ? "is-active" : ""}
+              onClick={() => setBookTab("trades")}
+              type="button"
+            >
+              Trades
+            </button>
+          </div>
+
+          {isTradesBookTab ? (
+            <>
+              <div className="trades-head">
+                <span>Price</span>
+                <span>Size(BTC)</span>
+                <span>Time</span>
+              </div>
+              <div className="trades-list">
+                {tradePrintRows.map((row, index) => (
+                  <div key={`${row.side}-${index}`} className="trades-row">
+                    <span className={`trades-price${row.side === "sell" ? " is-sell" : " is-buy"}`}>{row.price}</span>
+                    <span className="trades-size">{row.size}</span>
+                    <span className="trades-time-wrap">
+                      <span className="trades-time">{row.time}</span>
+                      <span className="trades-share" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                          <path
+                            d="M11.6667 4.16675H15.8333V8.33341"
+                            stroke="#07D4AA"
+                            strokeWidth="1.4"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M8.3335 11.6667L15.4168 4.58337"
+                            stroke="#07D4AA"
+                            strokeWidth="1.4"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M15.8333 11.6667V15.8334H4.16667V4.16675H8.33333"
+                            stroke="#07D4AA"
+                            strokeWidth="1.4"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="order-book-head">
+                <span className="qty-chip">
+                  <span className="qty-chip-value">0.05</span>
+                  <span className="qty-chip-caret" aria-hidden="true">
                     <img src={caretIcon} alt="" />
                   </span>
-                </div>
-                <p className="pair-leverage">40x</p>
+                </span>
+                <span className="book-unit">USDT</span>
               </div>
-            </div>
 
-            <div className="stats-grid">
-              {marketStats.map((item) => (
-                <div key={item.label} className="stat-item">
-                  <p className="stat-label">{item.label}</p>
-                  <p className={`stat-value${item.green ? " is-green" : ""}`}>{item.value}</p>
-                </div>
-              ))}
-            </div>
-          </section>
+              <div className="order-book-depth">
+                {orderBookBidRows.map((row, index) => (
+                  <div key={`bid-${index}`} className="book-depth-row is-bid">
+                    <span className="book-depth-bg" />
+                    <span className="book-depth-price">{row.price}</span>
+                    <span className="book-depth-size">{row.size}</span>
+                    <span className="book-depth-ratio">{row.ratio}</span>
+                  </div>
+                ))}
+              </div>
 
-          <section className="pro-chart-shell" ref={desktopChartHostRef} />
+              <div className="order-book-spread">
+                <span className="order-book-spread-label">Spread</span>
+                <span className="order-book-spread-size">0.0000</span>
+                <span className="order-book-spread-ratio">0.0005%</span>
+              </div>
 
-          <section className={`order-book${isTradesBookTab ? " is-trades" : ""}`}>
-            <div className="order-book-tabs">
+              <div className="order-book-depth">
+                {orderBookAskRows.map((row, index) => (
+                  <div key={`ask-${index}`} className="book-depth-row is-ask">
+                    <span className="book-depth-bg" />
+                    <span className="book-depth-price">{row.price}</span>
+                    <span className="book-depth-size">{row.size}</span>
+                    <span className="book-depth-ratio">{row.ratio}</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </section>
+
+        <section className={`bottom-table${isApiLimitsTab ? " is-api-limits" : ""}`}>
+          <div className="table-tabs">
+            {tableTabs.map((tab) => (
               <button
-                className={isTradesBookTab ? "" : "is-active"}
-                onClick={() => setBookTab("orderBook")}
+                key={tab.id}
+                className={tableTab === tab.id ? "is-active" : ""}
+                onClick={() => setTableTab(tab.id)}
                 type="button"
               >
-                Order Book
+                {tab.label}
               </button>
-              <button
-                className={isTradesBookTab ? "is-active" : ""}
-                onClick={() => setBookTab("trades")}
-                type="button"
-              >
-                Trades
-              </button>
-            </div>
+            ))}
+          </div>
 
-            {isTradesBookTab ? (
-              <>
-                <div className="trades-head">
-                  <span>Price</span>
-                  <span>Size(BTC)</span>
-                  <span>Time</span>
-                </div>
-                <div className="trades-list">
-                  {tradePrintRows.map((row, index) => (
-                    <div key={`${row.side}-${index}`} className="trades-row">
-                      <span className={`trades-price${row.side === "sell" ? " is-sell" : " is-buy"}`}>
-                        {row.price}
-                      </span>
-                      <span className="trades-size">{row.size}</span>
-                      <span className="trades-time-wrap">
-                        <span className="trades-time">{row.time}</span>
-                        <span className="trades-share" aria-hidden="true">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <path
-                              d="M11.6667 4.16675H15.8333V8.33341"
-                              stroke="#07D4AA"
-                              strokeWidth="1.4"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                            <path
-                              d="M8.3335 11.6667L15.4168 4.58337"
-                              stroke="#07D4AA"
-                              strokeWidth="1.4"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                            <path
-                              d="M15.8333 11.6667V15.8334H4.16667V4.16675H8.33333"
-                              stroke="#07D4AA"
-                              strokeWidth="1.4"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </span>
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="order-book-head">
-                  <span className="qty-chip">
-                    <span className="qty-chip-value">0.05</span>
-                    <span className="qty-chip-caret" aria-hidden="true">
-                      <img src={caretIcon} alt="" />
-                    </span>
-                  </span>
-                  <span className="book-unit">USDT</span>
-                </div>
-
-                <div className="order-book-depth">
-                  {orderBookBidRows.map((row, index) => (
-                    <div key={`bid-${index}`} className="book-depth-row is-bid">
-                      <span className="book-depth-bg" />
-                      <span className="book-depth-price">{row.price}</span>
-                      <span className="book-depth-size">{row.size}</span>
-                      <span className="book-depth-ratio">{row.ratio}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="order-book-spread">
-                  <span className="order-book-spread-label">Spread</span>
-                  <span className="order-book-spread-size">0.0000</span>
-                  <span className="order-book-spread-ratio">0.0005%</span>
-                </div>
-
-                <div className="order-book-depth">
-                  {orderBookAskRows.map((row, index) => (
-                    <div key={`ask-${index}`} className="book-depth-row is-ask">
-                      <span className="book-depth-bg" />
-                      <span className="book-depth-price">{row.price}</span>
-                      <span className="book-depth-size">{row.size}</span>
-                      <span className="book-depth-ratio">{row.ratio}</span>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-          </section>
-
-          <section className={`bottom-table${isApiLimitsTab ? " is-api-limits" : ""}`}>
-            <div className="table-tabs">
-              {tableTabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  className={tableTab === tab.id ? "is-active" : ""}
-                  onClick={() => setTableTab(tab.id)}
-                  type="button"
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-
+          <div className="table-content">
             {isBalanceTab ? (
               <>
                 <div className="balances-head">
@@ -1332,9 +1243,7 @@ function TradingPage() {
               <div className="api-limits-panel">
                 <div className="api-section-header">
                   <p className="api-section-title">AI Usage</p>
-                  <p className="api-wallet-address">
-                    Wallet Address: 0x0a40227b8315c486c06a19475c8543842b26b88f
-                  </p>
+                  <p className="api-wallet-address">Wallet Address: 0x0a40227b8315c486c06a19475c8543842b26b88f</p>
                 </div>
 
                 <div className="api-card-row">
@@ -1388,42 +1297,41 @@ function TradingPage() {
                 </div>
               </div>
             ) : null}
-          </section>
+          </div>
+        </section>
 
-          <aside className={`order-panel${isSellSide || isLimitType ? " is-sell" : ""}`}>
-            <TradeOrderFormContent
-              isLimitType={isLimitType}
-              isSellSide={isSellSide}
-              reduceOnly={reduceOnly}
-              quantityInput={quantityInput}
-              leverage={leverage}
-              leverageInput={leverageInput}
-              quantityUnit={quantityUnit}
-              tifUnit={tifUnit}
-              quantityUnitOptions={quantityUnitOptions}
-              tifUnitOptions={tifUnitOptions}
-              isQuantityUnitMenuOpen={isQuantityUnitMenuOpen}
-              isTifMenuOpen={isTifMenuOpen}
-              leverageTrackRef={leverageTrackRef}
-              quantityUnitWrapRef={quantityUnitWrapRef}
-              tifUnitWrapRef={tifUnitWrapRef}
-              onOrderTypeChange={handleOrderTypeChange}
-              onOrderSideChange={handleOrderSideChange}
-              onQuantityChange={handleQuantityChange}
-              onQuantityUnitToggle={handleQuantityUnitToggle}
-              onQuantityUnitSelect={handleQuantityUnitSelect}
-              onLeverageTrackPointerDown={handleTrackPointerDown}
-              onLeverageInputChange={handleLeverageInput}
-              onLeverageBlur={handleLeverageBlur}
-              onReduceOnlyToggle={handleReduceOnlyToggle}
-              onTifUnitToggle={handleTifUnitToggle}
-              onTifUnitSelect={handleTifUnitSelect}
-              showAccountActions
-              summaryRows={summaryRows}
-            />
-          </aside>
-
-        </div>
+        <aside className={`order-panel${isSellSide || isLimitType ? " is-sell" : ""}`}>
+          <TradeOrderFormContent
+            isLimitType={isLimitType}
+            isSellSide={isSellSide}
+            reduceOnly={reduceOnly}
+            quantityInput={quantityInput}
+            leverage={leverage}
+            leverageInput={leverageInput}
+            quantityUnit={quantityUnit}
+            tifUnit={tifUnit}
+            quantityUnitOptions={quantityUnitOptions}
+            tifUnitOptions={tifUnitOptions}
+            isQuantityUnitMenuOpen={isQuantityUnitMenuOpen}
+            isTifMenuOpen={isTifMenuOpen}
+            leverageTrackRef={leverageTrackRef}
+            quantityUnitWrapRef={quantityUnitWrapRef}
+            tifUnitWrapRef={tifUnitWrapRef}
+            onOrderTypeChange={handleOrderTypeChange}
+            onOrderSideChange={handleOrderSideChange}
+            onQuantityChange={handleQuantityChange}
+            onQuantityUnitToggle={handleQuantityUnitToggle}
+            onQuantityUnitSelect={handleQuantityUnitSelect}
+            onLeverageTrackPointerDown={handleTrackPointerDown}
+            onLeverageInputChange={handleLeverageInput}
+            onLeverageBlur={handleLeverageBlur}
+            onReduceOnlyToggle={handleReduceOnlyToggle}
+            onTifUnitToggle={handleTifUnitToggle}
+            onTifUnitSelect={handleTifUnitSelect}
+            showAccountActions
+            summaryRows={summaryRows}
+          />
+        </aside>
       </div>
     </div>
   );

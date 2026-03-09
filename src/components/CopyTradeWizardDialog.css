@@ -77,9 +77,9 @@
 
 .ct-wizard-step-dot {
   align-items: center;
-  border: 1px solid #07d4aa;
+  border: 1px solid var(--otx-theme-color);
   border-radius: 999px;
-  color: #07d4aa;
+  color: var(--otx-theme-color);
   display: inline-flex;
   flex-shrink: 0;
   font-size: 16px;
@@ -93,8 +93,8 @@
 }
 
 .ct-wizard-step.is-active .ct-wizard-step-dot {
-  background: #07d4aa;
-  border-color: #07d4aa;
+  background: var(--otx-theme-color);
+  border-color: var(--otx-theme-color);
   color: #000;
 }
 
@@ -164,8 +164,8 @@
 }
 
 .ct-wizard-account.is-selected {
-  background: rgba(7, 212, 170, 0.1);
-  border-color: #07d4aa;
+  background: rgba(var(--otx-theme-color-rgb), 0.1);
+  border-color: var(--otx-theme-color);
 }
 
 .ct-wizard-account-top {
@@ -245,7 +245,7 @@
 }
 
 .ct-wizard-account-value.is-blue {
-  color: #5d9dff;
+  color: #0168f0;
 }
 
 .ct-wizard-create {
@@ -253,7 +253,7 @@
   background: rgba(255, 255, 255, 0.1);
   border: 0;
   border-radius: 8px;
-  color: #07d4aa;
+  color: var(--otx-theme-color);
   cursor: pointer;
   display: inline-flex;
   font-size: 14px;
@@ -277,6 +277,10 @@
   justify-content: flex-end;
 }
 
+.ct-wizard-back {
+  display: none;
+}
+
 .ct-wizard-next {
   align-items: center;
   background: rgba(255, 255, 255, 0.2);
@@ -298,19 +302,26 @@
   .ct-wizard-overlay {
     align-items: flex-start;
     background: #273035;
-    inset: 48px 0 0;
+    inset: 60px 0 0;
     justify-content: stretch;
-    overflow-y: auto;
-    padding: 11px 12px calc(24px + env(safe-area-inset-bottom));
+    overflow: hidden;
+    padding: 11px 0 calc(24px + env(safe-area-inset-bottom));
   }
 
   .ct-wizard-dialog {
     background: transparent;
     border-radius: 0;
+    bottom: 0;
     gap: 12px;
-    min-height: calc(100dvh - 48px - 35px);
-    padding: 0 0 84px;
-    width: 100%;
+    left: 12px;
+    min-height: calc(100dvh - 60px - 35px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0;
+    right: 12px;
+    top: 11px;
+    width: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .ct-wizard-header {
@@ -326,7 +337,7 @@
   }
 
   .ct-wizard-title::before {
-    background: #07d4aa;
+    background: var(--otx-theme-color);
     border-radius: 0 50px 50px 0;
     content: "";
     height: 20px;
@@ -337,28 +348,15 @@
   }
 
   .ct-wizard-close {
-    align-items: center;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    bottom: calc(24px + env(safe-area-inset-bottom));
-    color: #fff;
-    height: 48px;
-    justify-content: center;
-    left: 12px;
-    position: fixed;
-    width: calc((100vw - 36px) / 2);
-    z-index: 2;
-  }
-
-  .ct-wizard-close span {
     display: none;
   }
 
+  .ct-wizard-close span {
+    display: block;
+  }
+
   .ct-wizard-close::after {
-    content: "Back";
-    font-size: 16px;
-    font-weight: 700;
-    line-height: 24px;
+    content: none;
   }
 
   .ct-wizard-steps {
@@ -436,7 +434,7 @@
   }
 
   .ct-wizard-section-title::before {
-    background: #07d4aa;
+    background: var(--otx-theme-color);
     border-radius: 0 50px 50px 0;
     content: "";
     height: 20px;
@@ -495,23 +493,40 @@
   }
 
   .ct-wizard-footer {
-    bottom: calc(24px + env(safe-area-inset-bottom));
-    left: calc(50% + 6px);
+    gap: 12px;
+    justify-content: stretch;
+    margin: 12px 0 40px;
     padding: 0;
-    position: fixed;
-    width: calc((100vw - 36px) / 2);
-    z-index: 2;
+    position: static;
+    width: 100%;
+  }
+
+  .ct-wizard-back {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    border: 0;
+    border-radius: 8px;
+    color: #fff;
+    display: inline-flex;
+    flex: 1 0 0;
+    font-size: 16px;
+    font-weight: 700;
+    height: 48px;
+    justify-content: center;
+    line-height: 24px;
+    padding: 4px 20px;
   }
 
   .ct-wizard-next {
-    background: #07d4aa;
+    background: var(--otx-theme-color);
     color: #273035;
     cursor: not-allowed;
     font-size: 16px;
     font-weight: 700;
+    flex: 1 0 0;
     height: 48px;
     opacity: 1;
-    width: 100%;
+    width: auto;
   }
 
   .ct-wizard-next:disabled {

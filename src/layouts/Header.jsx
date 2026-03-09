@@ -7,6 +7,12 @@ import navSignals from "../assets/icons/route-signals.svg";
 import navCopyTrade from "../assets/icons/route-copy-trade.svg";
 import navReferral from "../assets/icons/route-referral.svg";
 import navApi from "../assets/icons/route-api.svg";
+import navTradeMaskRaw from "../assets/icons/route-trade.svg?raw";
+import navPortfolioMaskRaw from "../assets/icons/route-portfolio.svg?raw";
+import navSignalsMaskRaw from "../assets/icons/route-signals.svg?raw";
+import navCopyTradeMaskRaw from "../assets/icons/route-copy-trade.svg?raw";
+import navReferralMaskRaw from "../assets/icons/route-referral.svg?raw";
+import navApiMaskRaw from "../assets/icons/route-api.svg?raw";
 import walletIcon from "../assets/icons/wallet.svg";
 import languageIcon from "../assets/icons/language.svg";
 import menuIcon from "../assets/icons/menu.svg";
@@ -14,6 +20,9 @@ import SlideDialog from "../components/SlideDialog.jsx";
 import useIsMobileViewport from "../hooks/useIsMobileViewport.js";
 import useClickOutside from "../hooks/useClickOutside.js";
 import "./Header.css";
+
+const THEME_STORAGE_KEY = "otx-theme-accent";
+const DEFAULT_THEME_ACCENT = "green";
 
 const assets = {
   logo,
@@ -28,13 +37,27 @@ const assets = {
   menu: menuIcon,
 };
 
+const svgMaskToDataUri = (rawSvg) => {
+  const compactSvg = rawSvg.replace(/\s+/g, " ").trim();
+  return `url("data:image/svg+xml;utf8,${encodeURIComponent(compactSvg)}")`;
+};
+
+const iconMasks = {
+  trade: svgMaskToDataUri(navTradeMaskRaw),
+  portfolio: svgMaskToDataUri(navPortfolioMaskRaw),
+  signals: svgMaskToDataUri(navSignalsMaskRaw),
+  copyTrade: svgMaskToDataUri(navCopyTradeMaskRaw),
+  referral: svgMaskToDataUri(navReferralMaskRaw),
+  api: svgMaskToDataUri(navApiMaskRaw),
+};
+
 const navItems = [
-  { label: "Trade", icon: assets.trade, to: "/", className: "otx-nav-trade" },
-  { label: "Portfolio", icon: assets.portfolio, to: "/portfolio" },
-  { label: "Signals", icon: assets.signals, to: "/signals" },
-  { label: "Copy Trade", icon: assets.copyTrade, to: "/copy-trade" },
-  { label: "Referral", icon: assets.referral, to: "/referral" },
-  { label: "API Management", icon: assets.api, to: "/api" },
+  { label: "Trade", icon: assets.trade, mask: iconMasks.trade, to: "/", className: "otx-nav-trade" },
+  { label: "Portfolio", icon: assets.portfolio, mask: iconMasks.portfolio, to: "/portfolio" },
+  { label: "Signals", icon: assets.signals, mask: iconMasks.signals, to: "/signals" },
+  { label: "Copy Trade", icon: assets.copyTrade, mask: iconMasks.copyTrade, to: "/copy-trade" },
+  { label: "Referral", icon: assets.referral, mask: iconMasks.referral, to: "/referral" },
+  { label: "API Management", icon: assets.api, mask: iconMasks.api, to: "/api" },
 ];
 
 const mobileMenuItems = [
@@ -46,15 +69,30 @@ const mobileMenuItems = [
   { label: "Api Management", to: "/api" },
 ];
 
+const getInitialThemeAccent = () => {
+  if (typeof window === "undefined") {
+    return DEFAULT_THEME_ACCENT;
+  }
+
+  const saved = window.localStorage.getItem(THEME_STORAGE_KEY);
+  return saved === "blue" ? "blue" : DEFAULT_THEME_ACCENT;
+};
+
 function Header() {
   const { pathname } = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isWalletConnected, setWalletConnected] = useState(false);
   const [isWalletMenuOpen, setWalletMenuOpen] = useState(false);
+  const [themeAccent, setThemeAccent] = useState(getInitialThemeAccent);
   const isMobileViewport = useIsMobileViewport();
   const walletMenuRef = useRef(null);
   const connectedWalletAddress = "0x7552b93da2437f89ac86db040f934be74cb44e03";
   const connectedWalletLabel = `${connectedWalletAddress.slice(0, 6)}...${connectedWalletAddress.slice(-4)}`;
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme-accent", themeAccent);
+    window.localStorage.setItem(THEME_STORAGE_KEY, themeAccent);
+  }, [themeAccent]);
 
   useEffect(() => {
     setIsMenuOpen(false);
@@ -98,6 +136,10 @@ function Header() {
     }
 
     setWalletMenuOpen((prev) => !prev);
+  };
+
+  const onToggleThemeAccent = () => {
+    setThemeAccent((prev) => (prev === "green" ? "blue" : "green"));
   };
 
   const onWalletMenuAction = (action) => {
@@ -179,16 +221,26 @@ function Header() {
                 to={item.to}
                 className={({ isActive }) => `${item.className ?? ""} otx-nav-item${isActive ? " is-active" : ""}`}
               >
-                <span className="otx-nav-icon" aria-hidden="true">
+                <span className="otx-nav-icon" aria-hidden="true" style={{ "--otx-nav-icon-mask": item.mask }}>
                   <img src={item.icon} alt="" />
                 </span>
-                <span>{item.label}</span>
+                <span className="otx-nav-label">{item.label}</span>
               </NavLink>
             ))}
           </nav>
         </div>
 
         <div className="otx-header-right">
+          <button
+            className="otx-theme-toggle"
+            type="button"
+            aria-label={`Switch theme color. Current ${themeAccent === "green" ? "green" : "blue"}`}
+            onClick={onToggleThemeAccent}
+          >
+            <span className="otx-theme-toggle-dot" aria-hidden="true" />
+            <span className="otx-theme-toggle-label">{themeAccent === "green" ? "Green" : "Blue"}</span>
+          </button>
+
           <div className="otx-wallet-menu-wrap" ref={walletMenuRef}>
             <button
               className={`otx-wallet-btn${isWalletConnected ? " is-connected" : ""}`}

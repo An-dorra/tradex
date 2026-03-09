@@ -13,6 +13,8 @@ const portfolioTabs = [
   "Deposit and Withdraws",
 ];
 
+const portfolioChartTabs = ["Account Value", "PNL"];
+
 const balanceRows = [
   {
     coin: "USDC(Perps)",
@@ -141,6 +143,7 @@ const portfolioTableData = {
 };
 
 function PortfolioPage() {
+  const [activeChartTab, setActiveChartTab] = useState(portfolioChartTabs[1]);
   const [activeTableTab, setActiveTableTab] = useState(portfolioTabs[0]);
   const currentTable = portfolioTableData[activeTableTab];
 
@@ -206,12 +209,29 @@ function PortfolioPage() {
           </article>
 
           <article className="route-surface portfolio-chart-card">
-            <div className="portfolio-chart-tabs">
-              <span className="portfolio-chart-tab">Account Value</span>
-              <span className="portfolio-chart-tab is-active">PNL</span>
+            <div className="portfolio-chart-tabs" role="tablist" aria-label="Portfolio chart tabs">
+              {portfolioChartTabs.map((tab) => (
+                <button
+                  key={tab}
+                  id={`portfolio-chart-tab-${tab.toLowerCase().replace(/\s+/g, "-")}`}
+                  className={`portfolio-chart-tab${tab === activeChartTab ? " is-active" : ""}`}
+                  type="button"
+                  role="tab"
+                  aria-selected={tab === activeChartTab}
+                  aria-controls="portfolio-chart-panel"
+                  onClick={() => setActiveChartTab(tab)}
+                >
+                  {tab}
+                </button>
+              ))}
             </div>
 
-            <div className="portfolio-chart-area">
+            <div
+              id="portfolio-chart-panel"
+              className={`portfolio-chart-area is-${activeChartTab.toLowerCase().replace(/\s+/g, "-")}`}
+              role="tabpanel"
+              aria-labelledby={`portfolio-chart-tab-${activeChartTab.toLowerCase().replace(/\s+/g, "-")}`}
+            >
               <span className="portfolio-chart-y is-4">4</span>
               <span className="portfolio-chart-y is-3">3</span>
               <span className="portfolio-chart-y is-2">2</span>

@@ -1,6 +1,6 @@
 .trade-footer-shell {
   bottom: 0;
-  height: 60px;
+  height: 40px;
   left: 0;
   margin: 0;
   overflow: visible;
@@ -14,7 +14,7 @@
   background: #1b2829;
   box-sizing: border-box;
   display: flex;
-  height: 60px;
+  height: 40px;
   justify-content: space-between;
   left: 0;
   padding: 14px clamp(16px, 1.25vw, 24px);
@@ -45,11 +45,11 @@
   border-radius: 4px;
   color: var(--otx-theme-color);
   display: inline-flex;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
   gap: 8px;
   line-height: 24px;
-  padding: 4px 8px;
+  padding: 0px 8px;
 }
 
 .status-dot {

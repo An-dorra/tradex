@@ -1794,12 +1794,12 @@
 
 /* Desktop trade layout rebuilt to match the Figma structure without viewport scaling. */
 .trade-screen {
-  background: linear-gradient(90deg, #0f1b1b 0%, #101617 38%, #0f1617 100%);
+  background: linear-gradient(90deg, #273035 0%, #243038 48%, #273035 100%);
   box-sizing: border-box;
   min-height: calc(100vh - 60px);
   overflow-x: hidden;
   overflow-y: visible;
-  padding-top: 80px;
+  padding-top: 60px;
 }
 
 .trade-stage {
@@ -1823,7 +1823,7 @@
 }
 
 :root[data-theme-accent="blue"] .trade-screen {
-  background: linear-gradient(90deg, #2d3760 0%, #313c69 48%, #2f3a65 100%);
+  background: #2d3760;
 }
 
 .market-strip,
@@ -2002,6 +2002,10 @@
     box-sizing: border-box;
     min-height: 100vh;
     padding: 48px 0 86px;
+  }
+
+  :root[data-theme-accent="blue"] .trade-mobile-screen {
+    background: #2d3760;
   }
 
   .trade-mobile-screen.is-account {

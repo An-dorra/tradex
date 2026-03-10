@@ -24,9 +24,9 @@
 .otx-header--trade {
   --otx-header-divider-color: rgba(255, 255, 255, 0.16);
   background: #17201f;
-  border-bottom: 1px solid var(--otx-header-divider-color);
+  /* border-bottom: 1px solid var(--otx-header-divider-color); */
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.32);
-  height: 80px;
+  height: 60px;
   left: 0;
   padding-inline: clamp(16px, 1.25vw, 24px);
   transform: none;
